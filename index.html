@@ -95,16 +95,16 @@
       #card-hold {
         position: absolute;
         left: 48%;
-        top: 38%;
+        top: 40%;
         width: 0;
         height: 0;
       }
       #map-card {
         position: absolute;
-        left: -880px;
-        top: -430px;
-        width: 1760px;
-        height: 860px;
+        left: -740px;
+        top: -360px;
+        width: 1480px;
+        height: 720px;
         transform-style: preserve-3d;
       }
       #map-card img {
@@ -371,6 +371,10 @@
         );
       }
 
+      /* fixed world probe used to derive screen-space camera motion */
+      const PROBE = llToVec(0, 85, 1);
+      const probeVec = new THREE.Vector3();
+
       const loader = new THREE.TextureLoader();
       function tex(url) {
         return new Promise((res, rej) => {
@@ -470,29 +474,29 @@
           uniform float uZoom, uCA, uGrain, uFrame, uVig, uExposure;
           varying vec2 vUv;
           float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
+          vec3 enc(vec3 c){
+            c = max(c, vec3(0.0));
+            return mix(c*12.92, 1.055*pow(c, vec3(1.0/2.4))-0.055, step(vec3(0.0031308), c));
+          }
           void main(){
             vec2 uv = vUv;
-            vec2 center = vec2(0.5);
-            vec2 rad = uv - center;
-            float mag = length(uBlur) + uZoom;
+            vec2 rad = uv - vec2(0.5);
             vec3 col = vec3(0.0);
-            float wsum = 0.0;
             for(int i=0;i<9;i++){
               float f = (float(i)/8.0 - 0.5);
               vec2 off = uBlur*f + rad*uZoom*f*1.4;
               float ca = uCA * f;
               vec2 s = uv + off;
-              col.r += texture2D(tDiffuse, s + rad*ca).r;
-              col.g += texture2D(tDiffuse, s).g;
-              col.b += texture2D(tDiffuse, s - rad*ca).b;
-              wsum += 1.0;
+              col.r += texture2D(tDiffuse, clamp(s + rad*ca, 0.001, 0.999)).r;
+              col.g += texture2D(tDiffuse, clamp(s, 0.001, 0.999)).g;
+              col.b += texture2D(tDiffuse, clamp(s - rad*ca, 0.001, 0.999)).b;
             }
-            col /= wsum;
+            col /= 9.0;
             col *= uExposure;
-            float d = length((uv - center) * vec2(1.0, 0.72));
-            col *= 1.0 - smoothstep(0.42, 0.95, d) * uVig;
-            float g = (hash(uv * vec2(1080.0, 1920.0) + uFrame * 1.7) - 0.5) * uGrain;
-            col += g;
+            col = enc(col);
+            float d = length((uv - vec2(0.5)) * vec2(1.0, 0.72));
+            col *= 1.0 - smoothstep(0.45, 0.95, d) * uVig;
+            col += (hash(uv * vec2(1080.0, 1920.0) + uFrame * 1.7) - 0.5) * uGrain;
             gl_FragColor = vec4(col, 1.0);
           }
         `,
@@ -675,10 +679,10 @@
 
       /* ------------------------------------------------- camera choreography */
       const KEYS = [
-        { t: 0.0, lat: 6, lng: 10, alt: 0.34, pitch: 0, ease: "power2.out" },
-        { t: 1.4, lat: 7, lng: 74, alt: 0.6, pitch: 2, ease: "sine.inOut" },
-        { t: 4.5, lat: 6, lng: 80, alt: 0.68, pitch: 2, ease: "power2.in" },
-        { t: 5.0, lat: 3, lng: 88, alt: 0.42, pitch: 0, ease: "power3.inOut" },
+        { t: 0.0, lat: 4, lng: 14, alt: 0.3, pitch: 0, ease: "power2.out" },
+        { t: 1.4, lat: 5, lng: 76, alt: 0.44, pitch: 2, ease: "sine.inOut" },
+        { t: 4.5, lat: 3, lng: 79, alt: 0.5, pitch: 2, ease: "power2.in" },
+        { t: 5.0, lat: 2, lng: 87, alt: 0.36, pitch: 0, ease: "power3.inOut" },
         { t: 5.85, lat: -6, lng: 90, alt: 1.92, pitch: 4, ease: "sine.out" },
         { t: 7.85, lat: -7, lng: 88, alt: 1.84, pitch: 4, ease: "power2.inOut" },
         { t: 8.8, lat: -11, lng: 84, alt: 0.95, pitch: 6, ease: "sine.inOut" },
@@ -721,6 +725,7 @@
         camera.lookAt(0, 0, 0);
         camera.rotateX(c.pitch * DEG);
         camera.updateMatrixWorld();
+        camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
       }
 
       /* analytic reveal windows */
@@ -928,7 +933,7 @@
       function updateAreaPos(t) {
         const wrap = $("t-area-wrap");
         if (t < 7.9 || t > 11.8) return;
-        projV.copy(llToVec(-14, 84, 1.0)).project(camera);
+        projV.copy(llToVec(-6, 86, 1.0)).project(camera);
         const sx = (projV.x * 0.5 + 0.5) * FW;
         const sy = (-projV.y * 0.5 + 0.5) * FH;
         wrap.style.left = Math.round(sx - 430) + "px";
@@ -948,26 +953,37 @@
         const c2 = camAt(Math.min(DUR, t + dt));
         applyCam(c);
 
-        /* motion-blur uniforms from analytic camera speed */
-        const dLng = ((c2.lng - c.lng + 540) % 360) - 180;
-        const dLat = c2.lat - c.lat;
-        const dAlt = c2.alt - c.alt;
-        const ang = Math.hypot(dLat, dLng) * DEG; // rad per dt
-        const dist = 1 + c.alt;
-        const pxPerRad = (FW / 2) / Math.tan(((camera.fov / 2) * DEG) / 1.55);
-        let blurPx = Math.min(140, ang * pxPerRad * 3.2);
-        let zoomPx = Math.min(110, Math.abs(dAlt) * 2600);
-        /* keep a faint softness baseline during high-energy windows only */
-        postMat.uniforms.uBlur.value.set(0, blurPx * 0.35);
-        postMat.uniforms.uZoom.value = zoomPx;
-        postMat.uniforms.uCA.value = Math.min(3.2, (blurPx + zoomPx) / 34);
-        postMat.uniforms.uFrame.value = Math.floor(t * 60);
-        postMat.uniforms.uGrain.value = 0.032 + Math.min(0.03, (blurPx + zoomPx) / 2600);
+        /* screen-space motion from a fixed world probe (pan + zoom decomposed) */
+        const n1 = probeVec.copy(PROBE).project(camera);
+        const px1 = n1.x * FW * 0.5;
+        const py1 = n1.y * FH * 0.5;
+        applyCam(c2);
+        const n2 = probeVec.copy(PROBE).project(camera);
+        const px2 = n2.x * FW * 0.5;
+        const py2 = n2.y * FH * 0.5;
+        applyCam(c);
 
-        /* scene exposure + vignette (title scene darker) */
-        const dim = win(t, 2.35, 2.6) * (1 - win(t, 4.5, 4.8));
-        postMat.uniforms.uExposure.value = 1.0 - 0.14 * dim;
-        postMat.uniforms.uVig.value = 0.38 + 0.14 * dim;
+        let dx = px2 - px1;
+        let dy = -(py2 - py1);
+        const blurLen = Math.hypot(dx, dy);
+        const BLUR_CAP = 110;
+        if (blurLen > BLUR_CAP) {
+          dx *= BLUR_CAP / blurLen;
+          dy *= BLUR_CAP / blurLen;
+        }
+        const zoomPx = Math.min(
+          80,
+          Math.abs(Math.hypot(px2, py2) - Math.hypot(px1, py1)),
+        );
+        postMat.uniforms.uBlur.value.set(dx / FW, dy / FH);
+        postMat.uniforms.uZoom.value = zoomPx / FW;
+        postMat.uniforms.uCA.value =
+          Math.min(2.4, blurLen * 0.045 + zoomPx * 0.06) / FW;
+        postMat.uniforms.uFrame.value = Math.floor(t * 60);
+        postMat.uniforms.uGrain.value =
+          0.03 + Math.min(0.02, (blurLen + zoomPx) / 4200);
+        postMat.uniforms.uExposure.value = 1.0;
+        postMat.uniforms.uVig.value = 0.3;
 
         /* overlay shells */
         const coastOn = t > 5.45 && t < 11.98;
