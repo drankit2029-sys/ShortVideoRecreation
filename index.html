@@ -68,11 +68,12 @@
         inset: 0;
         overflow: hidden;
         background: #031f18;
-        z-index: 2;
+        z-index: 4;
       }
       #card-inner {
         position: absolute;
         inset: 0;
+        perspective: 2400px;
       }
       #grid-persp {
         position: absolute;
@@ -86,11 +87,11 @@
         background-color: #031f18;
         background-image: linear-gradient(
             to right,
-            rgba(205, 228, 216, 0.5) 0 4px,
-            transparent 4px
+            rgba(205, 228, 216, 0.5) 0 5px,
+            transparent 5px
           ),
-          linear-gradient(to bottom, rgba(205, 228, 216, 0.5) 0 4px, transparent 4px);
-        background-size: 135px 135px;
+          linear-gradient(to bottom, rgba(205, 228, 216, 0.5) 0 5px, transparent 5px);
+        background-size: 96px 96px;
       }
       #card-hold {
         position: absolute;
@@ -101,10 +102,10 @@
       }
       #map-card {
         position: absolute;
-        left: -740px;
-        top: -360px;
-        width: 1480px;
-        height: 720px;
+        left: -860px;
+        top: -420px;
+        width: 1720px;
+        height: 840px;
         transform-style: preserve-3d;
       }
       #map-card img {
@@ -158,7 +159,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 200px;
+        height: 195px;
       }
       .lft {
         display: block;
@@ -166,18 +167,18 @@
       }
       .lin {
         display: inline-block;
-        font-size: 168px;
+        font-size: 235px;
         font-weight: 800;
         letter-spacing: 0.005em;
         color: #dcebe0;
         line-height: 1;
-        filter: drop-shadow(0 24px 26px rgba(0, 25, 18, 0.45));
+        filter: drop-shadow(0 24px 22px rgba(0, 25, 18, 0.28));
         will-change: transform, opacity;
       }
 
       /* 3rd */
       #t-third {
-        font-size: 178px;
+        font-size: 140px;
         font-weight: 800;
         color: #ffd84d;
         line-height: 1;
@@ -186,9 +187,9 @@
         will-change: transform, opacity;
       }
       #t-third sup {
-        font-size: 92px;
+        font-size: 78px;
         font-weight: 800;
-        vertical-align: 62px;
+        vertical-align: 46px;
         margin-left: 2px;
       }
 
@@ -200,7 +201,7 @@
         will-change: transform, opacity;
       }
       #area-num {
-        font-size: 150px;
+        font-size: 118px;
         font-weight: 800;
         color: #ffd84d;
         line-height: 1;
@@ -211,7 +212,7 @@
       #area-unit {
         display: flex;
         flex-direction: column;
-        font-size: 56px;
+        font-size: 44px;
         font-weight: 650;
         color: #ffd84d;
         line-height: 1.08;
@@ -224,7 +225,7 @@
         position: absolute;
         left: 0;
         right: 0;
-        top: 55%;
+        top: 56.5%;
         height: 220px;
         display: flex;
         align-items: center;
@@ -232,8 +233,8 @@
       }
       #pct-halo {
         position: absolute;
-        width: 760px;
-        height: 460px;
+        width: 560px;
+        height: 300px;
         border-radius: 50%;
         background: radial-gradient(
           ellipse at center,
@@ -246,7 +247,7 @@
       }
       #t-pct {
         position: relative;
-        font-size: 180px;
+        font-size: 145px;
         font-weight: 800;
         color: #ffd84d;
         line-height: 1;
@@ -258,7 +259,7 @@
 
       /* 1.5x */
       #t-15x {
-        font-size: 172px;
+        font-size: 150px;
         font-weight: 800;
         color: #ffd84d;
         line-height: 1;
@@ -372,7 +373,7 @@
       }
 
       /* fixed world probe used to derive screen-space camera motion */
-      const PROBE = llToVec(0, 85, 1);
+      let probe = llToVec(0, 85, 1);
       const probeVec = new THREE.Vector3();
 
       const loader = new THREE.TextureLoader();
@@ -542,9 +543,11 @@
           depthWrite: false,
           side: THREE.FrontSide,
         });
+        /* crop texture must be placed back onto the box region of the sphere:
+           tex = (sphereUv - boxOrigin) / boxExtent */
         map.wrapS = map.wrapT = THREE.ClampToEdgeWrapping;
-        map.repeat.set(uv.du, uv.dv);
-        map.offset.set(uv.u0, uv.v0);
+        map.repeat.set(1 / uv.du, 1 / uv.dv);
+        map.offset.set(-uv.u0 / uv.du, -uv.v0 / uv.dv);
         if (withReveal) {
           m.alphaMap = revealTex.clone();
           m.alphaMap.needsUpdate = true;
@@ -679,14 +682,17 @@
 
       /* ------------------------------------------------- camera choreography */
       const KEYS = [
-        { t: 0.0, lat: 4, lng: 14, alt: 0.3, pitch: 0, ease: "power2.out" },
-        { t: 1.4, lat: 5, lng: 76, alt: 0.44, pitch: 2, ease: "sine.inOut" },
-        { t: 4.5, lat: 3, lng: 79, alt: 0.5, pitch: 2, ease: "power2.in" },
+        { t: 0.0, lat: 4, lng: -78, alt: 0.5, pitch: 0, ease: "power2.in" },
+        { t: 0.3, lat: 5, lng: -25, alt: 0.58, pitch: 1, ease: "sine.inOut" },
+        { t: 1.1, lat: 7, lng: 42, alt: 0.74, pitch: 2, ease: "power2.out" },
+        { t: 1.75, lat: 6, lng: 76, alt: 0.52, pitch: 2, ease: "sine.out" },
+        { t: 2.55, lat: 4, lng: 80, alt: 0.44, pitch: 2, ease: "sine.inOut" },
+        { t: 4.5, lat: 3, lng: 83, alt: 0.46, pitch: 2, ease: "power2.in" },
         { t: 5.0, lat: 2, lng: 87, alt: 0.36, pitch: 0, ease: "power3.inOut" },
         { t: 5.85, lat: -6, lng: 90, alt: 1.92, pitch: 4, ease: "sine.out" },
         { t: 7.85, lat: -7, lng: 88, alt: 1.84, pitch: 4, ease: "power2.inOut" },
-        { t: 8.8, lat: -11, lng: 84, alt: 0.95, pitch: 6, ease: "sine.inOut" },
-        { t: 9.6, lat: -12, lng: 83, alt: 0.86, pitch: 6, ease: "power2.inOut" },
+        { t: 8.8, lat: -11, lng: 84, alt: 0.98, pitch: 6, ease: "sine.inOut" },
+        { t: 9.6, lat: -12, lng: 83, alt: 0.9, pitch: 6, ease: "power2.inOut" },
         { t: 11.2, lat: -8, lng: 86, alt: 1.72, pitch: 4, ease: "sine.in" },
         { t: 11.45, lat: -8, lng: 87, alt: 1.66, pitch: 4, ease: "power2.in" },
         { t: 11.95, lat: -2, lng: 97, alt: 1.35, pitch: 8, ease: "power2.out" },
@@ -780,12 +786,12 @@
         tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
 
         /* ---- title ---- */
-        const ind = buildWord($("word-indian"), "INDIAN", 13, 26);
-        const oce = buildWord($("word-ocean"), "OCEAN", 15, 22);
+        const ind = buildWord($("word-indian"), "INDIAN", 17, 42);
+        const oce = buildWord($("word-ocean"), "OCEAN", 19, 36);
         const titleAll = ind.concat(oce);
         tl.set("#t-title", { opacity: 1 }, 2.5);
         titleAll.forEach((el, i) => {
-          const at = i < 6 ? 2.58 + i * 0.085 : 3.06 + (i - 6) * 0.085;
+          const at = i < 6 ? 2.58 + i * 0.085 : 3.28 + (i - 6) * 0.11;
           tl.fromTo(
             el,
             { opacity: 0, y: 96, scale: 0.86 },
@@ -819,24 +825,24 @@
 
         /* ---- area counter ---- */
         const area = { v: 0 };
-        tl.fromTo("#t-area-wrap", { opacity: 0 }, { opacity: 1, duration: 0.12 }, 7.95);
+        tl.fromTo("#t-area-wrap", { opacity: 0 }, { opacity: 1, duration: 0.12 }, 7.9);
         tl.fromTo(
           "#t-area",
           { scale: 0.8 },
           { scale: 1, duration: 0.4, ease: "power3.out" },
-          7.95,
+          7.9,
         );
         tl.to(
           area,
           {
             v: 70.56,
-            duration: 2.05,
-            ease: "power3.out",
+            duration: 1.75,
+            ease: "power1.inOut",
             onUpdate: () => {
               $("area-num").textContent = area.v.toFixed(2);
             },
           },
-          7.95,
+          7.9,
         );
         tl.to("#t-area-wrap", { opacity: 0, duration: 0.25, ease: "power2.in" }, 11.45);
 
@@ -845,7 +851,7 @@
         tl.fromTo(
           "#map-card",
           { filter: "blur(30px)", x: -220, y: 60 },
-          { filter: "blur(0px)", x: 0, y: 0, duration: 0.62, ease: "power3.out" },
+          { filter: "blur(0px)", x: 0, y: 0, duration: 1.3, ease: "power3.out" },
           11.9,
         );
         tl.fromTo(
@@ -873,13 +879,13 @@
           pct,
           {
             v: 14,
-            duration: 1.5,
+            duration: 2.2,
             ease: "power4.out",
             onUpdate: () => {
               $("t-pct").textContent = Math.round(pct.v) + "%";
             },
           },
-          12.15,
+          12.1,
         );
         tl.to("#t-pct", { filter: "blur(26px)", scale: 1.15, opacity: 0, duration: 0.32, ease: "power2.in" }, 16.02);
         tl.to("#pct-halo", { opacity: 0, duration: 0.3 }, 16.02);
@@ -937,7 +943,7 @@
         const sx = (projV.x * 0.5 + 0.5) * FW;
         const sy = (-projV.y * 0.5 + 0.5) * FH;
         wrap.style.left = Math.round(sx - 430) + "px";
-        wrap.style.top = Math.round(sy - 90) + "px";
+        wrap.style.top = Math.round(sy - 64) + "px";
       }
 
       /* ------------------------------------------------------------ renderAt */
@@ -953,32 +959,34 @@
         const c2 = camAt(Math.min(DUR, t + dt));
         applyCam(c);
 
-        /* screen-space motion from a fixed world probe (pan + zoom decomposed) */
-        const n1 = probeVec.copy(PROBE).project(camera);
+        /* screen-space motion from a world probe at the current view centre */
+        probe = llToVec(c.lat, c.lng, 1);
+        const n1 = probeVec.copy(probe).project(camera);
         const px1 = n1.x * FW * 0.5;
         const py1 = n1.y * FH * 0.5;
         applyCam(c2);
-        const n2 = probeVec.copy(PROBE).project(camera);
+        const n2 = probeVec.copy(probe).project(camera);
         const px2 = n2.x * FW * 0.5;
         const py2 = n2.y * FH * 0.5;
         applyCam(c);
 
-        let dx = px2 - px1;
-        let dy = -(py2 - py1);
-        const blurLen = Math.hypot(dx, dy);
-        const BLUR_CAP = 110;
-        if (blurLen > BLUR_CAP) {
-          dx *= BLUR_CAP / blurLen;
-          dy *= BLUR_CAP / blurLen;
+        let dx = (px2 - px1) * 7;
+        let dy = -(py2 - py1) * 7;
+        const panLen = Math.hypot(dx, dy);
+        const BLUR_CAP = 260;
+        if (panLen > BLUR_CAP) {
+          dx *= BLUR_CAP / panLen;
+          dy *= BLUR_CAP / panLen;
         }
-        const zoomPx = Math.min(
-          80,
-          Math.abs(Math.hypot(px2, py2) - Math.hypot(px1, py1)),
-        );
+        /* analytic zoom: probe sits at screen centre, so radial growth is the
+           reliable signal — px-per-radian scaled by altitude change */
+        const pxPerRad = (FH / 2) / Math.tan(25 * DEG);
+        const zoomPx = Math.min(90, pxPerRad * Math.abs(c2.alt - c.alt) * 0.9);
+        const blurLen = Math.hypot(dx, dy);
         postMat.uniforms.uBlur.value.set(dx / FW, dy / FH);
         postMat.uniforms.uZoom.value = zoomPx / FW;
         postMat.uniforms.uCA.value =
-          Math.min(2.4, blurLen * 0.045 + zoomPx * 0.06) / FW;
+          Math.min(3.2, blurLen * 0.014 + zoomPx * 0.03) / FW;
         postMat.uniforms.uFrame.value = Math.floor(t * 60);
         postMat.uniforms.uGrain.value =
           0.03 + Math.min(0.02, (blurLen + zoomPx) / 4200);
