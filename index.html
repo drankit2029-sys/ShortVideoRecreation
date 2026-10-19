@@ -45,12 +45,13 @@
         background-color: #022019;
         background-image: linear-gradient(
             to right,
-            rgba(190, 210, 200, 0.34) 0 9px,
-            transparent 9px
+            rgba(190, 210, 200, 0.34) 0 5px,
+            transparent 5px
           ),
-          linear-gradient(to bottom, rgba(190, 210, 200, 0.34) 0 9px, transparent 9px);
-        background-size: 280px 280px;
+          linear-gradient(to bottom, rgba(190, 210, 200, 0.34) 0 5px, transparent 5px);
+        background-size: 110px 110px;
         background-position: 40px 60px;
+        transform-origin: 50% 50%;
       }
 
       #gl {
@@ -83,15 +84,15 @@
         height: 4200px;
         margin-left: -2100px;
         margin-top: -2100px;
-        transform: perspective(2800px) rotateX(24deg) rotateZ(-12deg);
+        transform: perspective(2800px) rotateX(7deg) rotateZ(-9deg);
         background-color: #031f18;
         background-image: linear-gradient(
             to right,
-            rgba(205, 228, 216, 0.5) 0 5px,
-            transparent 5px
+            rgba(205, 228, 216, 0.5) 0 4px,
+            transparent 4px
           ),
-          linear-gradient(to bottom, rgba(205, 228, 216, 0.5) 0 5px, transparent 5px);
-        background-size: 96px 96px;
+          linear-gradient(to bottom, rgba(205, 228, 216, 0.5) 0 4px, transparent 4px);
+        background-size: 84px 84px;
       }
       #card-hold {
         position: absolute;
@@ -114,7 +115,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: brightness(0.84) saturate(1.04) contrast(1.05);
+        filter: brightness(0.62) saturate(1.02) contrast(1.1);
         box-shadow: 0 60px 140px rgba(0, 0, 0, 0.55);
       }
       #card-edge {
@@ -167,7 +168,7 @@
       }
       .lin {
         display: inline-block;
-        font-size: 235px;
+        font-size: 242px;
         font-weight: 800;
         letter-spacing: 0.005em;
         color: #dcebe0;
@@ -178,7 +179,7 @@
 
       /* 3rd */
       #t-third {
-        font-size: 140px;
+        font-size: 155px;
         font-weight: 800;
         color: #ffd84d;
         line-height: 1;
@@ -187,9 +188,9 @@
         will-change: transform, opacity;
       }
       #t-third sup {
-        font-size: 78px;
+        font-size: 84px;
         font-weight: 800;
-        vertical-align: 46px;
+        vertical-align: 50px;
         margin-left: 2px;
       }
 
@@ -483,26 +484,36 @@
             vec2 uv = vUv;
             vec2 rad = uv - vec2(0.5);
             vec3 col = vec3(0.0);
+            float a = 0.0;
             for(int i=0;i<9;i++){
               float f = (float(i)/8.0 - 0.5);
               vec2 off = uBlur*f + rad*uZoom*f*1.4;
               float ca = uCA * f;
               vec2 s = uv + off;
+              vec2 sc = clamp(s, 0.001, 0.999);
               col.r += texture2D(tDiffuse, clamp(s + rad*ca, 0.001, 0.999)).r;
-              col.g += texture2D(tDiffuse, clamp(s, 0.001, 0.999)).g;
+              col.g += texture2D(tDiffuse, sc).g;
               col.b += texture2D(tDiffuse, clamp(s - rad*ca, 0.001, 0.999)).b;
+              a += texture2D(tDiffuse, sc).a;
             }
             col /= 9.0;
+            a /= 9.0;
             col *= uExposure;
             col = enc(col);
             float d = length((uv - vec2(0.5)) * vec2(1.0, 0.72));
             col *= 1.0 - smoothstep(0.45, 0.95, d) * uVig;
-            col += (hash(uv * vec2(1080.0, 1920.0) + uFrame * 1.7) - 0.5) * uGrain;
-            gl_FragColor = vec4(col, 1.0);
+            col += (hash(uv * vec2(1080.0, 1920.0) + uFrame * 1.7) - 0.5) * uGrain * a;
+            gl_FragColor = vec4(col * a, a);
           }
         `,
         depthTest: false,
         depthWrite: false,
+        transparent: true,
+        blending: THREE.CustomBlending,
+        blendSrc: THREE.OneFactor,
+        blendDst: THREE.OneMinusSrcAlphaFactor,
+        blendSrcAlpha: THREE.OneFactor,
+        blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
       });
       postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMat));
 
@@ -548,6 +559,14 @@
         map.wrapS = map.wrapT = THREE.ClampToEdgeWrapping;
         map.repeat.set(1 / uv.du, 1 / uv.dv);
         map.offset.set(-uv.u0 / uv.du, -uv.v0 / uv.dv);
+        /* drop everything outside the crop box so clamped edges never bleed
+           yellow box-outline lines across the poles */
+        m.onBeforeCompile = (sh) => {
+          sh.fragmentShader = sh.fragmentShader.replace(
+            "#include <clipping_planes_fragment>",
+            "if (vMapUv.x < 0.0 || vMapUv.x > 1.0 || vMapUv.y < 0.0 || vMapUv.y > 1.0) discard;\n#include <clipping_planes_fragment>",
+          );
+        };
         if (withReveal) {
           m.alphaMap = revealTex.clone();
           m.alphaMap.needsUpdate = true;
@@ -617,13 +636,13 @@
 
         /* US flag-map cutouts */
         const flagAnchors = [
-          [-4, 63],
-          [-5, 84],
-          [-16, 68],
-          [-18, 90],
-          [-28, 55],
-          [-30, 74],
-          [-31, 96],
+          [5, 55],
+          [6, 78],
+          [-1, 50],
+          [0, 80],
+          [-7, 45],
+          [-6, 74],
+          [-6, 98],
         ];
         const flagGeo = new THREE.PlaneGeometry(0.158, (0.158 * 466) / 984);
         for (const [lat, lng] of flagAnchors) {
@@ -643,10 +662,10 @@
         }
 
         /* moons + shadows */
-        const moonGeo = new THREE.SphereGeometry(0.125, 48, 32);
+        const moonGeo = new THREE.SphereGeometry(0.145, 48, 32);
         const moonSpots = [
-          [-8, 74],
-          [-7, 93],
+          [5, 82],
+          [5, 102],
         ];
         for (const [lat, lng] of moonSpots) {
           const mat = new THREE.MeshBasicMaterial({ map: BASE.moon });
@@ -663,7 +682,7 @@
           depthWrite: false,
         });
         moonShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.3), shMat);
-        moonShadow.userData.anchor = llToVec(-13, 84, 1.004);
+        moonShadow.userData.anchor = llToVec(2, 86, 1.004);
         moonShadow.visible = false;
         moonShadow.renderOrder = 3;
         scene.add(moonShadow);
@@ -682,29 +701,31 @@
 
       /* ------------------------------------------------- camera choreography */
       const KEYS = [
-        { t: 0.0, lat: 4, lng: -78, alt: 0.5, pitch: 0, ease: "power2.in" },
-        { t: 0.3, lat: 5, lng: -25, alt: 0.58, pitch: 1, ease: "sine.inOut" },
-        { t: 1.1, lat: 7, lng: 42, alt: 0.74, pitch: 2, ease: "power2.out" },
-        { t: 1.75, lat: 6, lng: 76, alt: 0.52, pitch: 2, ease: "sine.out" },
-        { t: 2.55, lat: 4, lng: 80, alt: 0.44, pitch: 2, ease: "sine.inOut" },
-        { t: 4.5, lat: 3, lng: 83, alt: 0.46, pitch: 2, ease: "power2.in" },
-        { t: 5.0, lat: 2, lng: 87, alt: 0.36, pitch: 0, ease: "power3.inOut" },
-        { t: 5.85, lat: -6, lng: 90, alt: 1.92, pitch: 4, ease: "sine.out" },
-        { t: 7.85, lat: -7, lng: 88, alt: 1.84, pitch: 4, ease: "power2.inOut" },
-        { t: 8.8, lat: -11, lng: 84, alt: 0.98, pitch: 6, ease: "sine.inOut" },
-        { t: 9.6, lat: -12, lng: 83, alt: 0.9, pitch: 6, ease: "power2.inOut" },
-        { t: 11.2, lat: -8, lng: 86, alt: 1.72, pitch: 4, ease: "sine.in" },
-        { t: 11.45, lat: -8, lng: 87, alt: 1.66, pitch: 4, ease: "power2.in" },
-        { t: 11.95, lat: -2, lng: 97, alt: 1.35, pitch: 8, ease: "power2.out" },
-        { t: 16.05, lat: 12, lng: 48, alt: 0.42, pitch: 0, ease: "power3.out" },
-        { t: 16.55, lat: 9, lng: 62, alt: 0.58, pitch: 1, ease: "sine.inOut" },
-        { t: 19.45, lat: 1, lng: 76, alt: 0.9, pitch: 3, ease: "power2.inOut" },
-        { t: 20.1, lat: 0, lng: 80, alt: 1.0, pitch: 3, ease: "sine.inOut" },
-        { t: 22.8, lat: -3, lng: 82, alt: 1.06, pitch: 2, ease: "power2.inOut" },
-        { t: 23.25, lat: 18, lng: 95, alt: 1.36, pitch: 6, ease: "sine.inOut" },
-        { t: 25.25, lat: 15, lng: 100, alt: 1.3, pitch: 6, ease: "power3.inOut" },
-        { t: 25.8, lat: 5, lng: 84, alt: 0.94, pitch: 3, ease: "sine.out" },
-        { t: 27.64, lat: 4, lng: 86, alt: 0.97, pitch: 3, ease: "sine.out" },
+        { t: 0.0, lat: 2, lng: -70, alt: 2.0, pitch: 0, ease: "power2.in" },
+        { t: 0.3, lat: 3, lng: -16, alt: 1.92, pitch: 1, ease: "sine.inOut" },
+        { t: 0.6, lat: 5, lng: 12, alt: 1.95, pitch: 2, ease: "sine.inOut" },
+        { t: 1.1, lat: 7, lng: 42, alt: 1.62, pitch: 2, ease: "power2.out" },
+        { t: 1.75, lat: 6, lng: 76, alt: 0.74, pitch: 2, ease: "sine.out" },
+        { t: 2.55, lat: 1, lng: 80, alt: 0.6, pitch: 2, ease: "sine.inOut" },
+        { t: 4.5, lat: 0.5, lng: 83, alt: 0.62, pitch: 2, ease: "power2.in" },
+        { t: 5.0, lat: 2, lng: 87, alt: 0.44, pitch: 0, ease: "power3.inOut" },
+        { t: 5.85, lat: -6, lng: 90, alt: 2.85, pitch: 4, ease: "sine.out" },
+        { t: 7.85, lat: -7, lng: 88, alt: 2.75, pitch: 4, ease: "power2.inOut" },
+        { t: 8.8, lat: -11, lng: 84, alt: 2.62, pitch: 6, ease: "sine.inOut" },
+        { t: 9.6, lat: -12, lng: 83, alt: 2.55, pitch: 6, ease: "power2.inOut" },
+        { t: 11.2, lat: -8, lng: 86, alt: 2.75, pitch: 4, ease: "sine.in" },
+        { t: 11.45, lat: -8, lng: 87, alt: 2.78, pitch: 4, ease: "power2.in" },
+        { t: 11.95, lat: -2, lng: 97, alt: 2.5, pitch: 6, ease: "power2.out" },
+        { t: 16.05, lat: 12, lng: 48, alt: 2.35, pitch: 0, ease: "power3.out" },
+        { t: 16.55, lat: 9, lng: 62, alt: 2.45, pitch: 1, ease: "sine.inOut" },
+        { t: 19.45, lat: 1, lng: 76, alt: 2.62, pitch: 3, ease: "power2.inOut" },
+        { t: 20.3, lat: 0.5, lng: 79, alt: 2.6, pitch: 3, ease: "sine.inOut" },
+        { t: 21.7, lat: 10, lng: 94, alt: 2.68, pitch: 5, ease: "power2.out" },
+        { t: 22.9, lat: 17, lng: 99, alt: 2.68, pitch: 6, ease: "sine.out" },
+        { t: 23.25, lat: 17, lng: 99, alt: 2.7, pitch: 6, ease: "sine.inOut" },
+        { t: 25.25, lat: 14, lng: 102, alt: 2.62, pitch: 6, ease: "power3.inOut" },
+        { t: 25.8, lat: 8, lng: 92, alt: 2.6, pitch: 4, ease: "sine.out" },
+        { t: 27.64, lat: 7, lng: 94, alt: 2.63, pitch: 4, ease: "sine.out" },
       ];
       const easeFns = KEYS.map((k) => gsap.parseEase(k.ease || "none"));
 
@@ -786,8 +807,8 @@
         tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
 
         /* ---- title ---- */
-        const ind = buildWord($("word-indian"), "INDIAN", 17, 42);
-        const oce = buildWord($("word-ocean"), "OCEAN", 19, 36);
+        const ind = buildWord($("word-indian"), "INDIAN", 22, 56);
+        const oce = buildWord($("word-ocean"), "OCEAN", 24, 46);
         const titleAll = ind.concat(oce);
         tl.set("#t-title", { opacity: 1 }, 2.5);
         titleAll.forEach((el, i) => {
@@ -836,13 +857,29 @@
           area,
           {
             v: 70.56,
-            duration: 1.75,
-            ease: "power1.inOut",
+            duration: 1.65,
+            ease: (u) => {
+              const P = [
+                [0, 0],
+                [0.394, 0.403],
+                [0.636, 0.79],
+                [0.939, 0.977],
+                [1, 1],
+              ];
+              for (let i = 1; i < P.length; i++) {
+                if (u <= P[i][0]) {
+                  const [x0, y0] = P[i - 1];
+                  const [x1, y1] = P[i];
+                  return y0 + ((y1 - y0) * (u - x0)) / (x1 - x0);
+                }
+              }
+              return 1;
+            },
             onUpdate: () => {
               $("area-num").textContent = area.v.toFixed(2);
             },
           },
-          7.9,
+          7.95,
         );
         tl.to("#t-area-wrap", { opacity: 0, duration: 0.25, ease: "power2.in" }, 11.45);
 
@@ -851,7 +888,7 @@
         tl.fromTo(
           "#map-card",
           { filter: "blur(30px)", x: -220, y: 60 },
-          { filter: "blur(0px)", x: 0, y: 0, duration: 1.3, ease: "power3.out" },
+          { filter: "blur(0px)", x: 0, y: 0, duration: 1.5, ease: "power3.out" },
           11.9,
         );
         tl.fromTo(
@@ -903,16 +940,43 @@
           );
         });
 
-        /* ---- 1.5x ---- */
-        tl.fromTo("#t-15x-wrap", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 23.08);
+        /* ---- 1.5x (counts up during the pan to Asia) ---- */
+        tl.fromTo("#t-15x-wrap", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 20.5);
         tl.fromTo(
           "#t-15x",
           { scale: 0.5, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2.4)" },
-          23.08,
+          { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2.4)" },
+          20.5,
+        );
+        const x15 = { v: 0 };
+        tl.to(
+          x15,
+          {
+            v: 1.5,
+            duration: 2.9,
+            ease: (u) => Math.pow(u, 1.35),
+            onStart: () => {
+              $("t-15x").textContent = "0.00x";
+            },
+            onUpdate: () => {
+              $("t-15x").textContent =
+                x15.v >= 1.495 ? "1.5x" : x15.v.toFixed(2) + "x";
+            },
+          },
+          20.5,
         );
         tl.to("#t-15x", { scale: 1.14, opacity: 0, duration: 0.22, ease: "power2.in" }, 25.08);
         tl.set("#t-15x-wrap", { opacity: 0 }, 25.35);
+
+        /* ---- background grid scale (parallax with camera distance) ---- */
+        tl.fromTo("#bgGrid", { scale: 0.3 }, { scale: 0.27, duration: 5.85 }, 0);
+        tl.to("#bgGrid", { scale: 0.41, duration: 2.75, ease: "sine.inOut" }, 5.85);
+        tl.to("#bgGrid", { scale: 0.62, duration: 8.0, ease: "none" }, 8.6);
+        tl.to("#bgGrid", { scale: 0.77, duration: 2.9, ease: "sine.inOut" }, 16.6);
+        tl.to("#bgGrid", { scale: 0.95, duration: 2.0, ease: "sine.inOut" }, 19.5);
+        tl.to("#bgGrid", { scale: 1.0, duration: 1.9, ease: "sine.inOut" }, 21.5);
+        tl.to("#bgGrid", { scale: 0.86, duration: 2.4, ease: "sine.inOut" }, 23.4);
+        tl.to("#bgGrid", { scale: 0.84, duration: 1.84, ease: "none" }, 25.8);
 
         /* ---- moons ---- */
         fx.moons.forEach((m, i) => {
@@ -929,7 +993,7 @@
           { s: 1.35, o: 0.95, duration: 0.26, ease: "power2.out" },
           26.04,
         );
-        tl.to(fx.cloud, { s: 2.3, o: 0, duration: 0.85, ease: "power1.out" }, 26.34);
+        tl.to(fx.cloud, { s: 2.3, o: 0, duration: 0.3, ease: "power1.out" }, 26.3);
 
         window.__timelines["main"] = tl;
       }
@@ -970,10 +1034,12 @@
         const py2 = n2.y * FH * 0.5;
         applyCam(c);
 
-        let dx = (px2 - px1) * 7;
-        let dy = -(py2 - py1) * 7;
+        let stylize = 4.5;
+        if (t > 20.2 && t < 22.5) stylize = 28;
+        let dx = (px2 - px1) * stylize;
+        let dy = -(py2 - py1) * stylize;
         const panLen = Math.hypot(dx, dy);
-        const BLUR_CAP = 260;
+        const BLUR_CAP = 240;
         if (panLen > BLUR_CAP) {
           dx *= BLUR_CAP / panLen;
           dy *= BLUR_CAP / panLen;
