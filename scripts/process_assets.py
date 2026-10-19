@@ -254,6 +254,8 @@ geo = json.loads(states_path.read_text())
 US_BOX = dict(lon0=-128.0, lon1=-64.0, lat0=22.0, lat1=51.5)
 fx0, fx1 = lon_to_x(US_BOX["lon0"]), lon_to_x(US_BOX["lon1"])
 fy0, fy1 = lat_to_y(US_BOX["lat1"]), lat_to_y(US_BOX["lat0"])
+fx0, fx1 = int(round(fx0)), int(round(fx1))
+fy0, fy1 = int(round(fy0)), int(round(fy1))
 fw, fh = fx1 - fx0, fy1 - fy0
 us_mask = Image.new("L", (W, H), 0)
 md = ImageDraw.Draw(us_mask)
@@ -326,6 +328,7 @@ shade += 0.07 * np.sin(2 * np.pi * (fx * 4.6 - fy * 1.2) + 2.1)
 shade -= 0.10 * fy  # bottom slightly darker
 farr = np.asarray(flag).astype(np.float32) * np.clip(shade, 0.72, 1.22)[..., None]
 flag = Image.fromarray(np.clip(farr, 0, 255).astype(np.uint8))
+flag = flag.resize((fw, fh), Image.LANCZOS)
 
 flag_rgba = np.dstack(
     [np.asarray(flag), np.asarray(us_crop_mask)]
