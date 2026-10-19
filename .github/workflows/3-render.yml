@@ -6,8 +6,8 @@ on:
     branches: [main]
     paths:
       - "index.html"
-      - "assets/vendor/**"
-      - "assets/fonts/**"
+      - "assets/**"
+      - ".github/workflows/3-render.yml"
 
 concurrency:
   group: render-main
