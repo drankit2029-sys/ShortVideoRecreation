@@ -22,8 +22,12 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install whisper
-        run: pip install --quiet openai-whisper numpy
+      - name: Install whisper + ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install --quiet openai-whisper numpy
+          ffmpeg -version | head -1
 
       - name: Extract audio from reference
         run: |

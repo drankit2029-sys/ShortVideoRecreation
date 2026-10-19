@@ -139,6 +139,10 @@ edge[y_tas:, -3:] |= basin[y_tas:, -3:]
 
 
 def dilate(mask_img: Image.Image, size: int) -> Image.Image:
+    if size < 3:
+        return mask_img
+    if size % 2 == 0:
+        size += 1
     return mask_img.filter(ImageFilter.MaxFilter(size))
 
 

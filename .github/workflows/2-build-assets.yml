@@ -22,7 +22,11 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install --quiet pillow numpy
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install --quiet pillow numpy
+          ffmpeg -version | head -1
 
       - name: Build assets
         run: python scripts/process_assets.py
