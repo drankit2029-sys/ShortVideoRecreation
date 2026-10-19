@@ -5,3 +5,4 @@ analysis/
 *.log
 __pycache__/
 .DS_Store
+assets/raw/

@@ -57,8 +57,8 @@ def try_fetch(urls, dest: Path, min_bytes: int = 2000) -> Path:
 
 
 # ---------------------------------------------------------------- earth texture
-print("[1/8] earth texture")
-earth_path = try_fetch(
+print("[1/8] earth texture (topo relief + blue-marble tone)")
+topo_path = try_fetch(
     [
         "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x5400x2700.jpg",
         "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73751/land_shallow_topo_2048.jpg",
@@ -67,43 +67,71 @@ earth_path = try_fetch(
     RAW / "earth-raw.jpg",
     min_bytes=100_000,
 )
+bm_path = try_fetch(
+    [
+        "https://cdn.jsdelivr.net/gh/mrdoob/three.js@r181/examples/textures/planets/earth_atmos_2048.jpg",
+        "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
+        "https://raw.githubusercontent.com/mrdoob/three.js/r181/examples/textures/planets/earth_atmos_2048.jpg",
+    ],
+    RAW / "blue-marble.jpg",
+    min_bytes=200_000,
+)
 
-img = Image.open(earth_path).convert("RGB")
+img = Image.open(topo_path).convert("RGB")
 W, H = img.size
-print(f"  texture {W}x{H}")
-a = np.asarray(img).astype(np.float32) / 255.0
-R, G, B = a[..., 0], a[..., 1], a[..., 2]
+print(f"  topo {W}x{H}")
+topo = np.asarray(img).astype(np.float32) / 255.0
+tR, tG, tB = topo[..., 0], topo[..., 1], topo[..., 2]
+tlum = 0.299 * tR + 0.587 * tG + 0.114 * tB
 
-# ocean: blue-dominant (bathymetry blues / shallow cyans)
-ocean = (B - R) > 0.04
-lum = 0.299 * R + 0.587 * G + 0.114 * B
+bm_img = Image.open(bm_path).convert("RGB").resize((W, H), Image.BICUBIC)
+bma = np.asarray(bm_img).astype(np.float32) / 255.0
+blum = 0.299 * bma[..., 0] + 0.587 * bma[..., 1] + 0.114 * bma[..., 2]
+_bl = Image.fromarray((np.clip(blum, 0, 1) * 255).astype(np.uint8))
+blum_s = np.asarray(_bl.filter(ImageFilter.GaussianBlur(2.0))).astype(np.float32) / 255.0
 
-# ---- ocean recolor -> reference teal
-ocean_base = np.array([22 / 255, 86 / 255, 74 / 255], dtype=np.float32)
-ocean_f = np.clip(0.70 + 0.60 * lum, 0.0, 1.15)[..., None]
-ocean_col = ocean_base[None, None, :] * ocean_f
+# ocean mask from topo colors (blue-dominant, not dark forests / not snow)
+ocean = ((tB - tR) > 0.04) & (tlum < 0.45)
+land = ~ocean
+_li = Image.fromarray((land * 255).astype(np.uint8), "L")
+_li = _li.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(3))
+land = np.asarray(_li) > 127
+ocean = ~land
 
-# ---- land duotone warm ramp
+# relief detail from topo (ratio vs local mean)
+_blur_tl = Image.fromarray((np.clip(tlum, 0, 1) * 255).astype(np.uint8))
+blur_tl = np.asarray(_blur_tl.filter(ImageFilter.GaussianBlur(10.0))).astype(np.float32) / 255.0
+relief = tlum / np.maximum(blur_tl, 0.02)
+
+# ---- land duotone warm ramp driven by blue-marble tone
 stops = [
-    (0.00, (46, 33, 24)),
-    (0.30, (107, 74, 51)),
-    (0.50, (159, 123, 92)),
-    (0.65, (183, 153, 132)),
-    (0.80, (210, 188, 158)),
-    (0.92, (232, 224, 208)),
-    (1.00, (245, 242, 234)),
+    (0.00, (88, 70, 55)),
+    (0.16, (122, 98, 78)),
+    (0.28, (158, 132, 106)),
+    (0.40, (182, 155, 128)),
+    (0.52, (200, 172, 144)),
+    (0.64, (214, 186, 158)),
+    (0.76, (228, 208, 184)),
+    (0.88, (240, 232, 220)),
+    (1.00, (248, 248, 248)),
 ]
 xs = np.array([s[0] for s in stops], dtype=np.float32)
 land_col = np.stack(
-    [np.interp(lum, xs, np.array([s[1][c] for s in stops], dtype=np.float32) / 255.0)
+    [np.interp(blum_s, xs, np.array([s[1][c] for s in stops], dtype=np.float32) / 255.0)
      for c in range(3)],
     axis=-1,
 )
+land_col *= np.clip(0.86 + 0.14 * relief, 0.72, 1.22)[..., None]
 
-out = np.where(ocean[..., None], ocean_col, land_col)
-out = np.clip((out - 0.5) * 1.06 + 0.5, 0, 1)
+# ---- ocean recolor -> reference flat teal with faint bathymetry
+ocean_base = np.array([24 / 255, 90 / 255, 76 / 255], dtype=np.float32)
+ocean_tone = 0.90 + 0.45 * np.clip(blum_s / 0.40, 0.0, 1.0)
+ocean_col = ocean_base[None, None, :] * ocean_tone[..., None] * np.clip(0.93 + 0.14 * relief, 0, 1.4)[..., None]
+
+out = np.where(land[..., None], land_col, ocean_col)
+out = np.clip((out - 0.5) * 1.05 + 0.5, 0, 1)
 Image.fromarray((out * 255).astype(np.uint8)).save(
-    PROC / "earth-graded.jpg", quality=92, subsampling=0
+    PROC / "earth-graded.jpg", quality=93, subsampling=0
 )
 print(f"  saved earth-graded.jpg ({(PROC / 'earth-graded.jpg').stat().st_size} bytes)")
 
@@ -138,36 +166,28 @@ y_tas = lat_to_y(-42.0) - by0
 edge[y_tas:, -3:] |= basin[y_tas:, -3:]
 
 
-def dilate(mask_img: Image.Image, size: int) -> Image.Image:
-    if size < 3:
-        return mask_img
-    if size % 2 == 0:
-        size += 1
-    return mask_img.filter(ImageFilter.MaxFilter(size))
-
-
-def glow_stack(edge_mask: np.ndarray, core="#FFE066", mid="#FFC93C",
-               outer="#FFA500") -> Image.Image:
-    """edge_mask: bool HxW -> RGBA glow layer."""
+def glow_stack(edge_mask: np.ndarray, core="#FFE66E", mid="#FFB800",
+               outer="#FF8C00") -> Image.Image:
+    """edge_mask: bool HxW -> RGBA glow layer (blur-based bloom, bright core)."""
     m = Image.fromarray((edge_mask * 255).astype(np.uint8), "L")
     layers = []
-    for size, col, alpha, blur in (
-        (3, outer, 60, 4),
-        (9, mid, 140, 1),
-        (2, core, 255, 0),
-    ):
-        d = dilate(m, size)
+    specs = (
+        (outer, 150, 14.0, 0),
+        (mid, 225, 5.0, 0),
+        (core, 255, 0.0, 7),
+    )
+    for col, alpha, blur, dil in specs:
+        d = m
+        if dil >= 3:
+            d = d.filter(ImageFilter.MaxFilter(dil if dil % 2 else dil + 1))
         if blur:
             d = d.filter(ImageFilter.GaussianBlur(blur))
         arr = np.asarray(d).astype(np.float32) / 255.0 * alpha
         rgba = np.zeros(edge_mask.shape + (4,), dtype=np.uint8)
         rgb = np.array(Image.new("RGB", (1, 1), col).getpixel((0, 0)), dtype=np.uint8)
-        rgba[..., 0] = rgb[0]
-        rgba[..., 1] = rgb[1]
-        rgba[..., 2] = rgb[2]
+        rgba[..., 0], rgba[..., 1], rgba[..., 2] = rgb[0], rgb[1], rgb[2]
         rgba[..., 3] = arr.astype(np.uint8)
         layers.append(Image.fromarray(rgba, "RGBA"))
-    # screen-ish combine (max alpha wins visually since all same hue family)
     base = Image.new("RGBA", layers[0].size, (0, 0, 0, 0))
     for l in layers:
         base = Image.alpha_composite(base, l)
@@ -181,25 +201,34 @@ print(f"  coast-glow.png {coast.size} ({(PROC / 'coast-glow.png').stat().st_size
 
 
 print("[3/8] basin grid overlay")
-# grid overlay inside basin: brighten fill + 4-degree grid
-step_deg = 4.0
-sx = 360.0 / W * step_deg  # px per step in x
-sy = 180.0 / H * step_deg
+# 5-degree lat/lng grid inside basin (aligned to meridians/parallels)
+step_deg = 5.0
+sx = W / 360.0 * step_deg  # px per step in x (75px at 5400)
+sy = H / 180.0 * step_deg
+line_w = 4
 grid = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
 gd = ImageDraw.Draw(grid)
 gx = 0.0
 while gx < cw:
-    gd.rectangle([gx, 0, gx + 1.6, ch], fill=(213, 232, 220, 135))
+    gd.rectangle([gx, 0, gx + line_w, ch], fill=(213, 232, 220, 150))
     gx += sx
 gy = 0.0
 while gy < ch:
-    gd.rectangle([0, gy, cw, gy + 1.6], fill=(213, 232, 220, 135))
+    gd.rectangle([0, gy, cw, gy + line_w], fill=(213, 232, 220, 150))
     gy += sy
+# small nodes at intersections
+gx = 0.0
+while gx < cw:
+    gy = 0.0
+    while gy < ch:
+        gd.ellipse([gx - 2.5, gy - 2.5, gx + 5.5, gy + 5.5], fill=(225, 240, 230, 200))
+        gy += sy
+    gx += sx
 grid_arr = np.asarray(grid).astype(np.float32)
+# subtle darker water fill inside basin
 fill = np.zeros((ch, cw, 4), dtype=np.float32)
-fill[..., 0], fill[..., 1], fill[..., 2] = 44, 96, 76
-fill[..., 3] = basin.astype(np.float32) * 52
-# composite grid only where basin
+fill[..., 0], fill[..., 1], fill[..., 2] = 10, 46, 38
+fill[..., 3] = basin.astype(np.float32) * 36
 grid_arr[..., 3] *= basin
 combined = np.maximum(fill, grid_arr)
 Image.fromarray(combined.astype(np.uint8), "RGBA").save(
@@ -230,7 +259,6 @@ asia = asia_land & ~excl
 aedge = np.zeros_like(asia)
 aedge[:-1, :] |= asia[:-1, :] != asia[1:, :]
 aedge[:, :-1] |= asia[:, :-1] != asia[:, 1:]
-aedge &= ~excl[:-1, :-1] if False else aedge  # keep
 asia_rgba = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a[..., 0], fill_a[..., 1], fill_a[..., 2] = 255, 201, 60
