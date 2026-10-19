@@ -39,10 +39,10 @@ jobs:
             fonts-noto-color-emoji
 
       - name: Install JS deps
-        run: npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund --save-dev hyperframes@0.8.171
 
       - name: Ensure browser
-        run: npx hyperframes browser ensure
+        run: npx hyperframes@0.8.171 browser ensure
 
       - name: Fetch processed assets
         run: |
@@ -54,12 +54,12 @@ jobs:
 
       - name: Validate composition
         run: |
-          npx hyperframes check
-          npx hyperframes lint
+          npx hyperframes@0.8.171 check
+          npx hyperframes@0.8.171 lint
 
       - name: QA snapshots (render vs reference pairs)
         run: |
-          npx hyperframes snapshot \
+          npx hyperframes@0.8.171 snapshot \
             --at 0.6,2.0,3.6,4.9,6.8,8.6,10.2,11.7,13.0,15.5,16.4,17.6,19.5,21.5,23.4,25.6,26.5,27.4 \
             --no-end \
             --against reference/target.mp4 \
@@ -69,7 +69,7 @@ jobs:
       - name: Render video
         run: |
           mkdir -p Output
-          npx hyperframes render --quality looks --fps 60 --output Output/recreation.mp4
+          npx hyperframes@0.8.171 render --quality looks --fps 60 --output Output/recreation.mp4
 
       - name: Compare against reference
         run: |
