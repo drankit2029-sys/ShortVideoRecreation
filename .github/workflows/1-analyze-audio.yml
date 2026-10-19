@@ -1,0 +1,49 @@
+name: 1-analyze-audio
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "reference/**"
+      - "scripts/transcribe_audio.py"
+
+permissions:
+  contents: read
+
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install whisper
+        run: pip install --quiet openai-whisper numpy
+
+      - name: Extract audio from reference
+        run: |
+          mkdir -p analysis
+          ffmpeg -y -i reference/target.mp4 -vn -ac 1 -ar 16000 analysis/audio.wav
+          ls -la analysis/
+
+      - name: Transcribe + envelope
+        run: python scripts/transcribe_audio.py
+
+      - name: Show results
+        run: |
+          echo "=== transcript.txt ==="
+          cat analysis/transcript.txt
+          echo ""
+          echo "=== transcript.json (head) ==="
+          head -c 2000 analysis/transcript.json || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audio-analysis
+          path: analysis/
+          retention-days: 7
