@@ -105,15 +105,15 @@ relief = tlum / np.maximum(blur_tl, 0.02)
 
 # ---- land duotone warm ramp driven by blue-marble tone
 stops = [
-    (0.00, (88, 70, 55)),
-    (0.16, (122, 98, 78)),
-    (0.28, (158, 132, 106)),
-    (0.40, (182, 155, 128)),
-    (0.52, (200, 172, 144)),
-    (0.64, (214, 186, 158)),
-    (0.76, (228, 208, 184)),
-    (0.88, (240, 232, 220)),
-    (1.00, (248, 248, 248)),
+    (0.00, (84, 66, 52)),
+    (0.16, (112, 90, 72)),
+    (0.28, (148, 122, 98)),
+    (0.40, (176, 150, 124)),
+    (0.52, (196, 166, 138)),
+    (0.64, (208, 178, 150)),
+    (0.76, (220, 198, 175)),
+    (0.88, (238, 234, 228)),
+    (1.00, (246, 246, 248)),
 ]
 xs = np.array([s[0] for s in stops], dtype=np.float32)
 land_col = np.stack(
@@ -124,7 +124,7 @@ land_col = np.stack(
 land_col *= np.clip(0.86 + 0.14 * relief, 0.72, 1.22)[..., None]
 
 # ---- ocean recolor -> reference flat teal with faint bathymetry
-ocean_base = np.array([24 / 255, 90 / 255, 76 / 255], dtype=np.float32)
+ocean_base = np.array([22 / 255, 80 / 255, 68 / 255], dtype=np.float32)
 ocean_tone = 0.90 + 0.45 * np.clip(blum_s / 0.40, 0.0, 1.0)
 ocean_col = ocean_base[None, None, :] * ocean_tone[..., None] * np.clip(0.93 + 0.14 * relief, 0, 1.4)[..., None]
 
@@ -256,6 +256,11 @@ excl = (
     | ((LON < 36.2) & (LAT > 19.5))            # Egypt / Africa north of Suez
 )
 asia = asia_land & ~excl
+# close snow-hole speckles, then open stray specks
+_ai = Image.fromarray((asia * 255).astype(np.uint8), "L")
+_ai = _ai.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.MinFilter(9))
+_ai = _ai.filter(ImageFilter.MinFilter(5)).filter(ImageFilter.MaxFilter(5))
+asia = (np.asarray(_ai) > 127) & ~excl
 aedge = np.zeros_like(asia)
 aedge[:-1, :] |= asia[:-1, :] != asia[1:, :]
 aedge[:, :-1] |= asia[:, :-1] != asia[:, 1:]
