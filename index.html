@@ -1,36 +1,270 @@
 <!doctype html>
-<html lang="en" data-resolution="portrait">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <title>Indian Ocean is larger than you think</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./assets/vendor/three.module.js"
+        }
+      }
+    </script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      @font-face {
+        font-family: "InterVar";
+        src: url("assets/fonts/InterVariable.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: block;
       }
       html,
       body {
         margin: 0;
-        width: 1080px;
-        height: 1920px;
-        overflow: hidden;
-        background: #0a0a0a;
-      }
-      #root {
+        padding: 0;
         width: 100%;
         height: 100%;
+        overflow: hidden;
+        background: #001d16;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #001d16;
+        font-family: "InterVar", system-ui, sans-serif;
+      }
+
+      /* screen-aligned dark grid backdrop (visible in the space bands around the globe) */
+      #bgGrid {
+        position: absolute;
+        inset: -20%;
+        background-color: #022019;
+        background-image: linear-gradient(
+            to right,
+            rgba(190, 210, 200, 0.34) 0 9px,
+            transparent 9px
+          ),
+          linear-gradient(to bottom, rgba(190, 210, 200, 0.34) 0 9px, transparent 9px);
+        background-size: 280px 280px;
+        background-position: 40px 60px;
+      }
+
+      #gl {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        z-index: 3;
+      }
+
+      /* ---------- flat world-map card scene ---------- */
+      #card-scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #031f18;
+        z-index: 2;
+      }
+      #card-inner {
+        position: absolute;
+        inset: 0;
+      }
+      #grid-persp {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 4200px;
+        height: 4200px;
+        margin-left: -2100px;
+        margin-top: -2100px;
+        transform: perspective(2800px) rotateX(24deg) rotateZ(-12deg);
+        background-color: #031f18;
+        background-image: linear-gradient(
+            to right,
+            rgba(205, 228, 216, 0.5) 0 4px,
+            transparent 4px
+          ),
+          linear-gradient(to bottom, rgba(205, 228, 216, 0.5) 0 4px, transparent 4px);
+        background-size: 135px 135px;
+      }
+      #card-hold {
+        position: absolute;
+        left: 48%;
+        top: 38%;
+        width: 0;
+        height: 0;
+      }
+      #map-card {
+        position: absolute;
+        left: -880px;
+        top: -430px;
+        width: 1760px;
+        height: 860px;
+        transform-style: preserve-3d;
+      }
+      #map-card img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.84) saturate(1.04) contrast(1.05);
+        box-shadow: 0 60px 140px rgba(0, 0, 0, 0.55);
+      }
+      #card-edge {
+        position: absolute;
+        left: -4px;
+        top: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-left: 7px solid #ffd84d;
+        border-bottom: 7px solid #ffd84d;
+        border-top: 2px solid rgba(255, 216, 77, 0.45);
+        border-right: 2px solid rgba(255, 216, 77, 0.3);
+        box-shadow: -14px 18px 44px rgba(255, 170, 20, 0.55),
+          0 0 90px rgba(255, 160, 10, 0.35);
+        pointer-events: none;
+      }
+
+      /* ---------- overlays ---------- */
+      #overlays {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        pointer-events: none;
+      }
+      .center-box {
+        position: absolute;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
       }
-      #title {
-        color: #f4f4f5;
-        font-size: 72px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
+
+      /* title */
+      #t-title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: 20px;
+      }
+      .word {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+      }
+      .lft {
+        display: block;
+        position: relative;
+      }
+      .lin {
+        display: inline-block;
+        font-size: 168px;
+        font-weight: 800;
+        letter-spacing: 0.005em;
+        color: #dcebe0;
+        line-height: 1;
+        filter: drop-shadow(0 24px 26px rgba(0, 25, 18, 0.45));
+        will-change: transform, opacity;
+      }
+
+      /* 3rd */
+      #t-third {
+        font-size: 178px;
+        font-weight: 800;
+        color: #ffd84d;
+        line-height: 1;
+        text-shadow: 0 0 26px rgba(255, 190, 40, 0.85), 0 0 70px rgba(255, 140, 0, 0.5),
+          0 0 150px rgba(255, 120, 0, 0.3);
+        will-change: transform, opacity;
+      }
+      #t-third sup {
+        font-size: 92px;
+        font-weight: 800;
+        vertical-align: 62px;
+        margin-left: 2px;
+      }
+
+      /* area counter */
+      #t-area {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        will-change: transform, opacity;
+      }
+      #area-num {
+        font-size: 150px;
+        font-weight: 800;
+        color: #ffd84d;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 0 24px rgba(255, 190, 40, 0.85), 0 0 64px rgba(255, 140, 0, 0.5),
+          0 0 130px rgba(255, 120, 0, 0.28);
+      }
+      #area-unit {
+        display: flex;
+        flex-direction: column;
+        font-size: 56px;
+        font-weight: 650;
+        color: #ffd84d;
+        line-height: 1.08;
+        opacity: 0.92;
+        text-shadow: 0 0 18px rgba(255, 180, 40, 0.6), 0 0 50px rgba(255, 140, 0, 0.3);
+      }
+
+      /* percent */
+      #t-pct-wrap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 55%;
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #pct-halo {
+        position: absolute;
+        width: 760px;
+        height: 460px;
+        border-radius: 50%;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(255, 165, 20, 0.55),
+          rgba(255, 140, 0, 0.22) 42%,
+          rgba(255, 120, 0, 0) 70%
+        );
+        filter: blur(18px);
+        will-change: opacity, transform;
+      }
+      #t-pct {
+        position: relative;
+        font-size: 180px;
+        font-weight: 800;
+        color: #ffd84d;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 0 22px rgba(255, 190, 40, 0.9), 0 0 60px rgba(255, 140, 0, 0.55),
+          0 0 140px rgba(255, 110, 0, 0.3);
+        will-change: transform, opacity, filter;
+      }
+
+      /* 1.5x */
+      #t-15x {
+        font-size: 172px;
+        font-weight: 800;
+        color: #ffd84d;
+        line-height: 1;
+        text-shadow: 0 0 24px rgba(255, 190, 40, 0.85), 0 0 70px rgba(255, 140, 0, 0.5),
+          0 0 150px rgba(255, 120, 0, 0.3);
+        will-change: transform, opacity;
       }
     </style>
   </head>
@@ -39,17 +273,807 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="10"
       data-width="1080"
       data-height="1920"
+      data-duration="27.633"
+      data-fps="60"
     >
-      <h1 id="title" class="clip" data-start="0" data-duration="10" data-track-index="0">Title</h1>
+      <div id="bgGrid"></div>
+
+      <section id="card-scene" class="clip" data-start="11.45" data-duration="5.05">
+        <div id="card-inner">
+          <div id="grid-persp" data-layout-allow-overflow><div id="grid-move"></div></div>
+          <div id="card-hold">
+            <div id="map-card">
+              <img src="assets/processed/earth-graded.jpg" alt="" />
+              <div id="card-edge"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <canvas id="gl" width="1080" height="1920"></canvas>
+
+      <div id="overlays">
+        <div class="center-box" id="t-title" style="opacity: 0">
+          <div class="word" id="word-indian"></div>
+          <div class="word" id="word-ocean"></div>
+        </div>
+
+        <div class="center-box" id="t-third-wrap" style="opacity: 0">
+          <div id="t-third">3<sup>rd</sup></div>
+        </div>
+
+        <div id="t-area-wrap" style="position: absolute; left: 0; top: 0; opacity: 0">
+          <div id="t-area">
+            <span id="area-num">0.00</span>
+            <span id="area-unit"><span>Million</span><span>Sq. Kms</span></span>
+          </div>
+        </div>
+
+        <div id="t-pct-wrap" style="opacity: 0">
+          <div id="pct-halo"></div>
+          <div id="t-pct">0%</div>
+        </div>
+
+        <div class="center-box" id="t-15x-wrap" style="opacity: 0">
+          <div id="t-15x">1.5x</div>
+        </div>
+      </div>
     </div>
-    <script>
-      const tl = gsap.timeline({ paused: true });
-      // Example: tl.fromTo("#title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6 }, 0);
-      window.__timelines["main"] = tl;
-      tl.seek(0);
+
+    <audio
+      id="vo"
+      src="assets/processed/audio/track.m4a"
+      data-start="0"
+      data-duration="27.633"
+    ></audio>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      const DUR = 27.633;
+      const FW = 1080;
+      const FH = 1920;
+      const DEG = Math.PI / 180;
+      const canvas = document.getElementById("gl");
+
+      /* ------------------------------------------------------------------ */
+      /* three.js scene                                                       */
+      /* ------------------------------------------------------------------ */
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        preserveDrawingBuffer: true,
+      });
+      renderer.setPixelRatio(1);
+      renderer.setSize(FW, FH, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setClearColor(0x000000, 0);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, FW / FH, 0.05, 120);
+
+      /* linear working buffer — sRGB encode happens once at canvas output */
+      const rt = new THREE.WebGLRenderTarget(FW, FH, {
+        samples: 4,
+        type: THREE.UnsignedByteType,
+      });
+
+      function llToVec(lat, lng, r) {
+        const phi = (90 - lat) * DEG;
+        const theta = (lng + 180) * DEG;
+        return new THREE.Vector3(
+          -r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta),
+        );
+      }
+
+      const loader = new THREE.TextureLoader();
+      function tex(url) {
+        return new Promise((res, rej) => {
+          loader.load(
+            url,
+            (t) => {
+              t.colorSpace = THREE.SRGBColorSpace;
+              t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+              res(t);
+            },
+            undefined,
+            rej,
+          );
+        });
+      }
+
+      function radialTex(size, inner) {
+        const c = document.createElement("canvas");
+        c.width = c.height = size;
+        const g = c.getContext("2d");
+        const grd = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+        grd.addColorStop(0, "rgba(255,255,255,1)");
+        grd.addColorStop(inner, "rgba(255,255,255,1)");
+        grd.addColorStop(1, "rgba(255,255,255,0)");
+        g.fillStyle = grd;
+        g.fillRect(0, 0, size, size);
+        const t = new THREE.CanvasTexture(c);
+        t.colorSpace = THREE.NoColorSpace;
+        return t;
+      }
+
+      function cloudTex() {
+        const c = document.createElement("canvas");
+        c.width = 512;
+        c.height = 256;
+        const g = c.getContext("2d");
+        const puffs = [
+          [150, 150, 95, 0.85],
+          [250, 120, 110, 0.95],
+          [360, 150, 90, 0.8],
+          [205, 175, 80, 0.7],
+          [315, 178, 75, 0.7],
+          [255, 95, 60, 0.55],
+        ];
+        for (const [x, y, r, a] of puffs) {
+          const grd = g.createRadialGradient(x, y, 0, x, y, r);
+          grd.addColorStop(0, `rgba(235,248,242,${a})`);
+          grd.addColorStop(0.55, `rgba(225,244,236,${a * 0.55})`);
+          grd.addColorStop(1, "rgba(220,240,232,0)");
+          g.fillStyle = grd;
+          g.beginPath();
+          g.arc(x, y, r, 0, Math.PI * 2);
+          g.fill();
+        }
+        const t = new THREE.CanvasTexture(c);
+        t.colorSpace = THREE.SRGBColorSpace;
+        return t;
+      }
+
+      function shadowTex() {
+        const c = document.createElement("canvas");
+        c.width = c.height = 256;
+        const g = c.getContext("2d");
+        const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+        grd.addColorStop(0, "rgba(4,26,20,0.5)");
+        grd.addColorStop(0.6, "rgba(4,26,20,0.22)");
+        grd.addColorStop(1, "rgba(4,26,20,0)");
+        g.fillStyle = grd;
+        g.fillRect(0, 0, 256, 256);
+        const t = new THREE.CanvasTexture(c);
+        t.colorSpace = THREE.NoColorSpace;
+        return t;
+      }
+
+      /* post-processing pass */
+      const postScene = new THREE.Scene();
+      const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const postMat = new THREE.ShaderMaterial({
+        uniforms: {
+          tDiffuse: { value: rt.texture },
+          uBlur: { value: new THREE.Vector2(0, 0) },
+          uZoom: { value: 0 },
+          uCA: { value: 0 },
+          uGrain: { value: 0.035 },
+          uFrame: { value: 0 },
+          uVig: { value: 0.38 },
+          uExposure: { value: 1.0 },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
+        `,
+        fragmentShader: `
+          precision highp float;
+          uniform sampler2D tDiffuse;
+          uniform vec2 uBlur;
+          uniform float uZoom, uCA, uGrain, uFrame, uVig, uExposure;
+          varying vec2 vUv;
+          float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
+          void main(){
+            vec2 uv = vUv;
+            vec2 center = vec2(0.5);
+            vec2 rad = uv - center;
+            float mag = length(uBlur) + uZoom;
+            vec3 col = vec3(0.0);
+            float wsum = 0.0;
+            for(int i=0;i<9;i++){
+              float f = (float(i)/8.0 - 0.5);
+              vec2 off = uBlur*f + rad*uZoom*f*1.4;
+              float ca = uCA * f;
+              vec2 s = uv + off;
+              col.r += texture2D(tDiffuse, s + rad*ca).r;
+              col.g += texture2D(tDiffuse, s).g;
+              col.b += texture2D(tDiffuse, s - rad*ca).b;
+              wsum += 1.0;
+            }
+            col /= wsum;
+            col *= uExposure;
+            float d = length((uv - center) * vec2(1.0, 0.72));
+            col *= 1.0 - smoothstep(0.42, 0.95, d) * uVig;
+            float g = (hash(uv * vec2(1080.0, 1920.0) + uFrame * 1.7) - 0.5) * uGrain;
+            col += g;
+            gl_FragColor = vec4(col, 1.0);
+          }
+        `,
+        depthTest: false,
+        depthWrite: false,
+      });
+      postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMat));
+
+      /* ------------------------------------------------------------- build */
+      const BASE = {
+        earth: null,
+        coast: null,
+        grid: null,
+        asia: null,
+        flag: null,
+        moon: null,
+      };
+      let globe, coastShell, gridShell, asiaShell, atmo;
+      const flags = [];
+      const moons = [];
+      let cloud, moonShadow;
+      const revealTex = radialTex(256, 0.06);
+
+      const BOX = { lon0: 20, lon1: 146.8, lat0: -60, lat1: 26 };
+      const ASIA = { lon0: 25, lon1: 180, lat0: -11, lat1: 78 };
+      const TEXW = 5400,
+        TEXH = 2700;
+
+      function cropUv(box) {
+        const u0 = (box.lon0 + 180) / 360;
+        const u1 = (box.lon1 + 180) / 360;
+        const v1 = 1 - (box.lat0 + 90) / 180;
+        const v0 = 1 - (box.lat1 + 90) / 180;
+        return { u0, v0, du: u1 - u0, dv: v1 - v0, cu: (u0 + u1) / 2, cv: (v0 + v1) / 2 };
+      }
+      const boxUv = cropUv(BOX);
+      const asiaUv = cropUv(ASIA);
+
+      function shell(r, map, uv, withReveal) {
+        const m = new THREE.MeshBasicMaterial({
+          map,
+          transparent: true,
+          depthWrite: false,
+          side: THREE.FrontSide,
+        });
+        map.wrapS = map.wrapT = THREE.ClampToEdgeWrapping;
+        map.repeat.set(uv.du, uv.dv);
+        map.offset.set(uv.u0, uv.v0);
+        if (withReveal) {
+          m.alphaMap = revealTex.clone();
+          m.alphaMap.needsUpdate = true;
+          m.alphaMap.wrapS = m.alphaMap.wrapT = THREE.ClampToEdgeWrapping;
+        }
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 168, 120), m);
+        mesh.renderOrder = 2;
+        return mesh;
+      }
+
+      function setReveal(mat, cu, cv, k) {
+        if (!mat.alphaMap) return;
+        const s = Math.max(k, 1e-4);
+        mat.alphaMap.repeat.set(s, s);
+        mat.alphaMap.offset.set(cu * (1 - s), cv * (1 - s));
+        mat.alphaMap.needsUpdate = false;
+      }
+
+      function buildScene() {
+        const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+        const globeMat = new THREE.MeshBasicMaterial({ map: BASE.earth });
+        globe = new THREE.Mesh(new THREE.SphereGeometry(1, 168, 120), globeMat);
+        scene.add(globe);
+
+        coastShell = shell(1.0016, BASE.coast, boxUv, true);
+        coastShell.material.opacity = 0;
+        scene.add(coastShell);
+
+        gridShell = shell(1.0024, BASE.grid, boxUv, true);
+        gridShell.material.opacity = 0;
+        scene.add(gridShell);
+
+        asiaShell = shell(1.0018, BASE.asia, asiaUv, true);
+        asiaShell.material.opacity = 0;
+        scene.add(asiaShell);
+
+        atmo = new THREE.Mesh(
+          new THREE.SphereGeometry(1.05, 96, 64),
+          new THREE.ShaderMaterial({
+            uniforms: {},
+            vertexShader: `
+              varying vec3 vN; varying vec3 vP;
+              void main(){
+                vN = normalize(normalMatrix * normal);
+                vec4 mv = modelViewMatrix * vec4(position,1.0);
+                vP = mv.xyz;
+                gl_Position = projectionMatrix * mv;
+              }
+            `,
+            fragmentShader: `
+              varying vec3 vN; varying vec3 vP;
+              void main(){
+                vec3 v = normalize(-vP);
+                float fr = pow(1.0 - abs(dot(normalize(vN), v)), 3.2);
+                gl_FragColor = vec4(vec3(0.32, 0.78, 0.66) * fr * 0.55, fr * 0.5);
+              }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.BackSide,
+          }),
+        );
+        atmo.renderOrder = 1;
+        scene.add(atmo);
+
+        /* US flag-map cutouts */
+        const flagAnchors = [
+          [-4, 63],
+          [-5, 84],
+          [-16, 68],
+          [-18, 90],
+          [-28, 55],
+          [-30, 74],
+          [-31, 96],
+        ];
+        const flagGeo = new THREE.PlaneGeometry(0.158, (0.158 * 466) / 984);
+        for (const [lat, lng] of flagAnchors) {
+          const mat = new THREE.MeshBasicMaterial({
+            map: BASE.flag,
+            transparent: true,
+            depthWrite: false,
+          });
+          const mesh = new THREE.Mesh(flagGeo, mat);
+          mesh.userData.anchor = llToVec(lat, lng, 1.006);
+          mesh.userData.lat = lat;
+          mesh.userData.lng = lng;
+          mesh.visible = false;
+          mesh.renderOrder = 4;
+          scene.add(mesh);
+          flags.push(mesh);
+        }
+
+        /* moons + shadows */
+        const moonGeo = new THREE.SphereGeometry(0.125, 48, 32);
+        const moonSpots = [
+          [-8, 74],
+          [-7, 93],
+        ];
+        for (const [lat, lng] of moonSpots) {
+          const mat = new THREE.MeshBasicMaterial({ map: BASE.moon });
+          const mesh = new THREE.Mesh(moonGeo, mat);
+          mesh.userData.anchor = llToVec(lat, lng, 1.002);
+          mesh.visible = false;
+          mesh.renderOrder = 5;
+          scene.add(mesh);
+          moons.push(mesh);
+        }
+        const shMat = new THREE.MeshBasicMaterial({
+          map: shadowTex(),
+          transparent: true,
+          depthWrite: false,
+        });
+        moonShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.3), shMat);
+        moonShadow.userData.anchor = llToVec(-13, 84, 1.004);
+        moonShadow.visible = false;
+        moonShadow.renderOrder = 3;
+        scene.add(moonShadow);
+
+        const clMat = new THREE.MeshBasicMaterial({
+          map: cloudTex(),
+          transparent: true,
+          depthWrite: false,
+        });
+        cloud = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.36), clMat);
+        cloud.userData.anchor = llToVec(-14, 84, 1.008);
+        cloud.visible = false;
+        cloud.renderOrder = 6;
+        scene.add(cloud);
+      }
+
+      /* ------------------------------------------------- camera choreography */
+      const KEYS = [
+        { t: 0.0, lat: 6, lng: 10, alt: 0.34, pitch: 0, ease: "power2.out" },
+        { t: 1.4, lat: 7, lng: 74, alt: 0.6, pitch: 2, ease: "sine.inOut" },
+        { t: 4.5, lat: 6, lng: 80, alt: 0.68, pitch: 2, ease: "power2.in" },
+        { t: 5.0, lat: 3, lng: 88, alt: 0.42, pitch: 0, ease: "power3.inOut" },
+        { t: 5.85, lat: -6, lng: 90, alt: 1.92, pitch: 4, ease: "sine.out" },
+        { t: 7.85, lat: -7, lng: 88, alt: 1.84, pitch: 4, ease: "power2.inOut" },
+        { t: 8.8, lat: -11, lng: 84, alt: 0.95, pitch: 6, ease: "sine.inOut" },
+        { t: 9.6, lat: -12, lng: 83, alt: 0.86, pitch: 6, ease: "power2.inOut" },
+        { t: 11.2, lat: -8, lng: 86, alt: 1.72, pitch: 4, ease: "sine.in" },
+        { t: 11.45, lat: -8, lng: 87, alt: 1.66, pitch: 4, ease: "power2.in" },
+        { t: 11.95, lat: -2, lng: 97, alt: 1.35, pitch: 8, ease: "power2.out" },
+        { t: 16.05, lat: 12, lng: 48, alt: 0.42, pitch: 0, ease: "power3.out" },
+        { t: 16.55, lat: 9, lng: 62, alt: 0.58, pitch: 1, ease: "sine.inOut" },
+        { t: 19.45, lat: 1, lng: 76, alt: 0.9, pitch: 3, ease: "power2.inOut" },
+        { t: 20.1, lat: 0, lng: 80, alt: 1.0, pitch: 3, ease: "sine.inOut" },
+        { t: 22.8, lat: -3, lng: 82, alt: 1.06, pitch: 2, ease: "power2.inOut" },
+        { t: 23.25, lat: 18, lng: 95, alt: 1.36, pitch: 6, ease: "sine.inOut" },
+        { t: 25.25, lat: 15, lng: 100, alt: 1.3, pitch: 6, ease: "power3.inOut" },
+        { t: 25.8, lat: 5, lng: 84, alt: 0.94, pitch: 3, ease: "sine.out" },
+        { t: 27.64, lat: 4, lng: 86, alt: 0.97, pitch: 3, ease: "sine.out" },
+      ];
+      const easeFns = KEYS.map((k) => gsap.parseEase(k.ease || "none"));
+
+      function camAt(t) {
+        let i = 0;
+        while (i < KEYS.length - 2 && t >= KEYS[i + 1].t) i++;
+        const a = KEYS[i],
+          b = KEYS[i + 1];
+        let u = (t - a.t) / (b.t - a.t);
+        u = Math.min(1, Math.max(0, u));
+        u = easeFns[i](u);
+        return {
+          lat: a.lat + (b.lat - a.lat) * u,
+          lng: a.lng + (b.lng - a.lng) * u,
+          alt: a.alt + (b.alt - a.alt) * u,
+          pitch: a.pitch + (b.pitch - a.pitch) * u,
+        };
+      }
+
+      function applyCam(c) {
+        const dir = llToVec(c.lat, c.lng, 1);
+        camera.position.copy(dir).multiplyScalar(1 + c.alt);
+        camera.up.set(0, 1, 0);
+        camera.lookAt(0, 0, 0);
+        camera.rotateX(c.pitch * DEG);
+        camera.updateMatrixWorld();
+      }
+
+      /* analytic reveal windows */
+      function smooth01(x) {
+        x = Math.min(1, Math.max(0, x));
+        return x * x * (3 - 2 * x);
+      }
+      function win(t, t0, t1) {
+        return smooth01((t - t0) / (t1 - t0));
+      }
+      function revealK(t, t0, t1, kMax) {
+        const r = win(t, t0, t1);
+        const e = 1 - Math.pow(1 - r, 2.2);
+        return kMax - (kMax - 1) * e;
+      }
+
+      /* fx state driven by GSAP */
+      const fx = {
+        flags: Array.from({ length: 7 }, () => ({ p: 0 })),
+        moons: Array.from({ length: 2 }, () => ({ h: 0.5 })),
+        cloud: { s: 0.15, o: 0 },
+        titleOpacity: { v: 0 },
+      };
+
+      /* --------------------------------------------------------------- DOM */
+      const $ = (id) => document.getElementById(id);
+
+      function buildWord(el, word, maxRot, arcDrop) {
+        const n = word.length;
+        const nodes = [];
+        for (let i = 0; i < n; i++) {
+          const outer = document.createElement("span");
+          outer.className = "lft";
+          const inner = document.createElement("span");
+          inner.className = "lin";
+          inner.textContent = word[i];
+          const s = n > 1 ? i / (n - 1) - 0.5 : 0;
+          const rot = s * 2 * maxRot;
+          const dy = arcDrop * (s * 2) * (s * 2);
+          outer.style.transform = `translateY(${dy}px) rotate(${rot}deg)`;
+          outer.appendChild(inner);
+          el.appendChild(outer);
+          nodes.push(inner);
+        }
+        return nodes;
+      }
+
+      /* ------------------------------------------------- timeline (after load) */
+      let tl = null;
+
+      function buildTimeline() {
+        tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
+
+        /* ---- title ---- */
+        const ind = buildWord($("word-indian"), "INDIAN", 13, 26);
+        const oce = buildWord($("word-ocean"), "OCEAN", 15, 22);
+        const titleAll = ind.concat(oce);
+        tl.set("#t-title", { opacity: 1 }, 2.5);
+        titleAll.forEach((el, i) => {
+          const at = i < 6 ? 2.58 + i * 0.085 : 3.06 + (i - 6) * 0.085;
+          tl.fromTo(
+            el,
+            { opacity: 0, y: 96, scale: 0.86 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.52, ease: "power3.out" },
+            at,
+          );
+        });
+        tl.to(
+          titleAll,
+          {
+            opacity: 0,
+            y: -48,
+            scale: 1.1,
+            duration: 0.26,
+            ease: "power2.in",
+            stagger: 0.016,
+          },
+          4.32,
+        );
+
+        /* ---- 3rd ---- */
+        tl.fromTo("#t-third-wrap", { opacity: 0 }, { opacity: 1, duration: 0.08 }, 6.3);
+        tl.fromTo(
+          "#t-third",
+          { scale: 0.42, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.48, ease: "back.out(2.3)" },
+          6.3,
+        );
+        tl.to("#t-third", { scale: 1.16, opacity: 0, duration: 0.2, ease: "power2.in" }, 7.78);
+        tl.set("#t-third-wrap", { opacity: 0 }, 8.0);
+
+        /* ---- area counter ---- */
+        const area = { v: 0 };
+        tl.fromTo("#t-area-wrap", { opacity: 0 }, { opacity: 1, duration: 0.12 }, 7.95);
+        tl.fromTo(
+          "#t-area",
+          { scale: 0.8 },
+          { scale: 1, duration: 0.4, ease: "power3.out" },
+          7.95,
+        );
+        tl.to(
+          area,
+          {
+            v: 70.56,
+            duration: 2.05,
+            ease: "power3.out",
+            onUpdate: () => {
+              $("area-num").textContent = area.v.toFixed(2);
+            },
+          },
+          7.95,
+        );
+        tl.to("#t-area-wrap", { opacity: 0, duration: 0.25, ease: "power2.in" }, 11.45);
+
+        /* ---- percent card scene ---- */
+        tl.fromTo("#card-inner", { opacity: 0 }, { opacity: 1, duration: 0.14 }, 11.52);
+        tl.fromTo(
+          "#map-card",
+          { filter: "blur(30px)", x: -220, y: 60 },
+          { filter: "blur(0px)", x: 0, y: 0, duration: 0.62, ease: "power3.out" },
+          11.9,
+        );
+        tl.fromTo(
+          "#map-card",
+          { rotationX: 40, rotationZ: -22, rotationY: -19 },
+          { rotationX: 34, rotationZ: -17, rotationY: -14, duration: 4.0, ease: "sine.inOut" },
+          12.1,
+        );
+        tl.fromTo(
+          "#grid-move",
+          { x: -60, y: 40 },
+          { x: 50, y: -30, duration: 4.6, ease: "sine.inOut" },
+          11.6,
+        );
+        tl.fromTo("#t-pct-wrap", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 12.05);
+        tl.fromTo(
+          "#t-pct",
+          { scale: 0.7, filter: "blur(16px)" },
+          { scale: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" },
+          12.05,
+        );
+        tl.fromTo("#pct-halo", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 12.05);
+        const pct = { v: 0 };
+        tl.to(
+          pct,
+          {
+            v: 14,
+            duration: 1.5,
+            ease: "power4.out",
+            onUpdate: () => {
+              $("t-pct").textContent = Math.round(pct.v) + "%";
+            },
+          },
+          12.15,
+        );
+        tl.to("#t-pct", { filter: "blur(26px)", scale: 1.15, opacity: 0, duration: 0.32, ease: "power2.in" }, 16.02);
+        tl.to("#pct-halo", { opacity: 0, duration: 0.3 }, 16.02);
+        tl.to("#card-inner", { opacity: 0, duration: 0.3, ease: "power2.in" }, 16.12);
+        tl.to("#map-card", { filter: "blur(34px)", x: -240, duration: 0.34, ease: "power2.in" }, 16.05);
+
+        /* ---- flags ---- */
+        const flagTimes = [16.72, 18.36, 18.52, 18.68, 19.0, 19.16, 19.38];
+        flagTimes.forEach((at, i) => {
+          tl.fromTo(
+            fx.flags[i],
+            { p: 0 },
+            { p: 1, duration: 0.44, ease: "back.out(2.2)" },
+            at,
+          );
+        });
+
+        /* ---- 1.5x ---- */
+        tl.fromTo("#t-15x-wrap", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 23.08);
+        tl.fromTo(
+          "#t-15x",
+          { scale: 0.5, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2.4)" },
+          23.08,
+        );
+        tl.to("#t-15x", { scale: 1.14, opacity: 0, duration: 0.22, ease: "power2.in" }, 25.08);
+        tl.set("#t-15x-wrap", { opacity: 0 }, 25.35);
+
+        /* ---- moons ---- */
+        fx.moons.forEach((m, i) => {
+          tl.fromTo(
+            m,
+            { h: 0.5 },
+            { h: 0, duration: 0.42, ease: "power2.in" },
+            25.78 + i * 0.06,
+          );
+        });
+        tl.fromTo(
+          fx.cloud,
+          { s: 0.2, o: 0 },
+          { s: 1.35, o: 0.95, duration: 0.26, ease: "power2.out" },
+          26.04,
+        );
+        tl.to(fx.cloud, { s: 2.3, o: 0, duration: 0.85, ease: "power1.out" }, 26.34);
+
+        window.__timelines["main"] = tl;
+      }
+
+      /* --------------------------------------------------------- area anchor */
+      const projV = new THREE.Vector3();
+      function updateAreaPos(t) {
+        const wrap = $("t-area-wrap");
+        if (t < 7.9 || t > 11.8) return;
+        projV.copy(llToVec(-14, 84, 1.0)).project(camera);
+        const sx = (projV.x * 0.5 + 0.5) * FW;
+        const sy = (-projV.y * 0.5 + 0.5) * FH;
+        wrap.style.left = Math.round(sx - 430) + "px";
+        wrap.style.top = Math.round(sy - 90) + "px";
+      }
+
+      /* ------------------------------------------------------------ renderAt */
+      let lastT = -1;
+      function renderAt(t) {
+        if (!tl) return;
+        t = Math.min(DUR, Math.max(0, t));
+        if (t === lastT) return;
+        lastT = t;
+
+        const dt = 1 / 120;
+        const c = camAt(t);
+        const c2 = camAt(Math.min(DUR, t + dt));
+        applyCam(c);
+
+        /* motion-blur uniforms from analytic camera speed */
+        const dLng = ((c2.lng - c.lng + 540) % 360) - 180;
+        const dLat = c2.lat - c.lat;
+        const dAlt = c2.alt - c.alt;
+        const ang = Math.hypot(dLat, dLng) * DEG; // rad per dt
+        const dist = 1 + c.alt;
+        const pxPerRad = (FW / 2) / Math.tan(((camera.fov / 2) * DEG) / 1.55);
+        let blurPx = Math.min(140, ang * pxPerRad * 3.2);
+        let zoomPx = Math.min(110, Math.abs(dAlt) * 2600);
+        /* keep a faint softness baseline during high-energy windows only */
+        postMat.uniforms.uBlur.value.set(0, blurPx * 0.35);
+        postMat.uniforms.uZoom.value = zoomPx;
+        postMat.uniforms.uCA.value = Math.min(3.2, (blurPx + zoomPx) / 34);
+        postMat.uniforms.uFrame.value = Math.floor(t * 60);
+        postMat.uniforms.uGrain.value = 0.032 + Math.min(0.03, (blurPx + zoomPx) / 2600);
+
+        /* scene exposure + vignette (title scene darker) */
+        const dim = win(t, 2.35, 2.6) * (1 - win(t, 4.5, 4.8));
+        postMat.uniforms.uExposure.value = 1.0 - 0.14 * dim;
+        postMat.uniforms.uVig.value = 0.38 + 0.14 * dim;
+
+        /* overlay shells */
+        const coastOn = t > 5.45 && t < 11.98;
+        coastShell.visible = coastOn;
+        if (coastOn) {
+          setReveal(coastShell.material, boxUv.cu, boxUv.cv, revealK(t, 5.5, 6.42, 4.2));
+          coastShell.material.opacity = win(t, 5.48, 5.7) * (1 - win(t, 11.6, 11.95));
+        }
+        const gridOn = t > 7.88 && t < 11.65;
+        gridShell.visible = gridOn;
+        if (gridOn) {
+          setReveal(gridShell.material, boxUv.cu, boxUv.cv, revealK(t, 7.95, 9.35, 4.6));
+          gridShell.material.opacity = win(t, 7.92, 8.2) * (1 - win(t, 11.32, 11.6));
+        }
+        const asiaOn = t > 22.88 && t < 25.45;
+        asiaShell.visible = asiaOn;
+        if (asiaOn) {
+          setReveal(asiaShell.material, asiaUv.cu, asiaUv.cv, revealK(t, 22.95, 23.35, 3.6));
+          asiaShell.material.opacity = win(t, 22.9, 23.12) * (1 - win(t, 25.25, 25.42));
+        }
+
+        /* flags */
+        for (let i = 0; i < flags.length; i++) {
+          const f = flags[i];
+          const p = fx.flags[i].p;
+          f.visible = p > 0.004 && t > 16.5 && t < 19.95;
+          if (f.visible) {
+            const lift = (1 - Math.min(1, p)) * 0.09;
+            f.position.copy(f.userData.anchor).multiplyScalar(1 + lift);
+            f.quaternion.copy(camera.quaternion);
+            f.scale.setScalar(0.25 + 0.75 * p);
+            f.material.opacity = Math.min(1, p * 2.4) * (1 - win(t, 19.7, 19.92));
+          }
+        }
+
+        /* moons + clouds */
+        const moonVis = t > 25.7;
+        moons.forEach((m, i) => {
+          const h = fx.moons[i].h;
+          m.visible = moonVis && h < 0.499;
+          if (m.visible) {
+            m.position.copy(m.userData.anchor).multiplyScalar(1 + h);
+            m.quaternion.copy(camera.quaternion);
+          }
+        });
+        if (moonShadow) {
+          moonShadow.visible = moonVis && fx.moons[0].h < 0.25;
+          if (moonShadow.visible) {
+            moonShadow.position.copy(moonShadow.userData.anchor);
+            moonShadow.quaternion.copy(camera.quaternion);
+            moonShadow.material.opacity = 1 - win(t, 26.1, 26.7);
+          }
+        }
+        if (cloud) {
+          const cvis = fx.cloud.o > 0.01;
+          cloud.visible = cvis;
+          if (cvis) {
+            cloud.position.copy(cloud.userData.anchor);
+            cloud.quaternion.copy(camera.quaternion);
+            cloud.scale.setScalar(fx.cloud.s);
+            cloud.material.opacity = fx.cloud.o;
+          }
+        }
+
+        updateAreaPos(t);
+
+        renderer.setRenderTarget(rt);
+        renderer.clear();
+        renderer.render(scene, camera);
+        renderer.setRenderTarget(null);
+        renderer.render(postScene, postCam);
+      }
+
+      /* ---------------------------------------------------------------- boot */
+      async function boot() {
+        const [earth, coast, grid, asia, flag, moon] = await Promise.all([
+          tex("assets/processed/earth-graded.jpg"),
+          tex("assets/processed/coast-glow.png"),
+          tex("assets/processed/basin-grid.png"),
+          tex("assets/processed/asia-glow.png"),
+          tex("assets/processed/usa-flag.png"),
+          tex("assets/processed/moon.jpg"),
+        ]);
+        BASE.earth = earth;
+        BASE.coast = coast;
+        BASE.grid = grid;
+        BASE.asia = asia;
+        BASE.flag = flag;
+        BASE.moon = moon;
+        buildScene();
+        buildTimeline();
+        try {
+          await document.fonts.load('800 100px "InterVar"');
+          await document.fonts.ready;
+        } catch (e) {
+          /* font load is non-fatal */
+        }
+        window.addEventListener("hf-seek", (ev) => {
+          const t = ev.detail.time;
+          if (tl) tl.time(t);
+          renderAt(t);
+        });
+        if (tl) tl.eventCallback("onUpdate", () => renderAt(tl.time()));
+        renderAt(window.__hfThreeTime || 0);
+      }
+      boot();
     </script>
   </body>
 </html>
