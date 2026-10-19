@@ -65,3 +65,5 @@ print("segments:", len(transcript.get("segments", [])))
 print("words:", len(transcript.get("words", [])))
 print("text:", transcript.get("text", "")[:500])
 sys.exit(0)
+
+# push-trigger for ffmpeg fix
