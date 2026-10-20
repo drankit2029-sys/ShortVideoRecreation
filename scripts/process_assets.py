@@ -205,7 +205,7 @@ print(f"  coast-glow.png {coast.size} ({(PROC / 'coast-glow.png').stat().st_size
 
 print("[3/8] basin grid overlay")
 # ~3.5-degree lat/lng grid inside basin (aligned to meridians/parallels)
-step_deg = 3.5
+step_deg = 10.0
 sx = W / 360.0 * step_deg
 sy = H / 180.0 * step_deg
 line_w = 3
@@ -213,7 +213,7 @@ grid = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
 gd = ImageDraw.Draw(grid)
 gx = 0.0
 while gx < cw:
-    gd.rectangle([gx, 0, gx + line_w, ch], fill=(213, 232, 220, 150))
+    gd.rectangle([gx, 0, gx + line_w, ch], fill=(213, 232, 220, 130))
     gx += sx
 gy = 0.0
 while gy < ch:
@@ -270,9 +270,14 @@ aedge[:, :-1] |= asia[:, :-1] != asia[:, 1:]
 asia_rgba = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a[..., 0], fill_a[..., 1], fill_a[..., 2] = 255, 201, 60
-fill_a[..., 3] = asia.astype(np.float32) * 48
+fill_a[..., 3] = asia.astype(np.float32) * 36
 glow = np.asarray(glow_stack(aedge, core="#FFD24A", mid="#FFB300", outer="#FF9500")).astype(np.float32)
 asia_rgba = np.maximum(fill_a, glow)
+# feather the crop borders so the rectangle cut never shows a hard edge
+_fy = np.clip(np.minimum(np.arange(ah), ah - 1 - np.arange(ah)) / (0.05 * ah), 0, 1)
+_fx = np.clip(np.minimum(np.arange(aw), aw - 1 - np.arange(aw)) / (0.05 * aw), 0, 1)
+_feather = np.minimum(_fy[:, None], _fx[None, :]).astype(np.float32) ** 1.5
+asia_rgba[..., 3] *= _feather
 Image.fromarray(asia_rgba.astype(np.uint8), "RGBA").save(
     PROC / "asia-glow.png", optimize=True
 )

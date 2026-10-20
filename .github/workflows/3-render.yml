@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
           import json, math, sys
-          DUR, FPS, N = 27.633, 24, 20
+          DUR, FPS, N = 27.633, 24, 40
           frames = math.ceil(DUR * FPS)
           bounds = [min(frames, (i * frames) // N) for i in range(N + 1)]
           shards = [{"i": i, "f0": bounds[i], "f1": bounds[i + 1]}
@@ -35,7 +35,7 @@ jobs:
           print(f"# {len(shards)} shards, {frames} frames @ {FPS}fps", file=sys.stderr)
           EOF
 
-  # One runner per shard -> 20 parallel capture workers
+  # One runner per shard -> 40 parallel capture workers
   shard:
     needs: plan
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 40
       matrix:
         shard: ${{ fromJson(needs.plan.outputs.shards) }}
     steps:
@@ -64,6 +64,15 @@ jobs:
             libxdamage1 libxfixes3 libxrandr2 libgbm1 \
             libpango-1.0-0 libcairo2 libasound2t64 fonts-liberation \
             fonts-noto-color-emoji
+
+      - name: Cache hyperframes deps + browser
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/hyperframes
+            ~/.hyperframes/cache
+          key: hf-${{ runner.os }}-hyperframes-0.8.171
 
       - name: Install JS deps
         run: npm install --no-audit --no-fund --save-dev hyperframes@0.8.171
@@ -119,6 +128,15 @@ jobs:
             libxdamage1 libxfixes3 libxrandr2 libgbm1 \
             libpango-1.0-0 libcairo2 libasound2t64 fonts-liberation \
             fonts-noto-color-emoji
+
+      - name: Cache hyperframes deps + browser
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/hyperframes
+            ~/.hyperframes/cache
+          key: hf-${{ runner.os }}-hyperframes-0.8.171
 
       - name: Install JS deps
         run: npm install --no-audit --no-fund --save-dev hyperframes@0.8.171
