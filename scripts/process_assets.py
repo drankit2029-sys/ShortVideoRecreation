@@ -211,30 +211,30 @@ print("[3/8] basin grid overlay")
 step_deg = 12.0
 sx = W / 360.0 * step_deg
 sy = H / 180.0 * step_deg
-line_w = 3
+line_w = 2
 grid = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
 gd = ImageDraw.Draw(grid)
 gx = 0.0
 while gx < cw:
-    gd.rectangle([gx, 0, gx + line_w, ch], fill=(213, 232, 220, 130))
+    gd.rectangle([gx, 0, gx + line_w, ch], fill=(213, 232, 220, 92))
     gx += sx
 gy = 0.0
 while gy < ch:
-    gd.rectangle([0, gy, cw, gy + line_w], fill=(213, 232, 220, 150))
+    gd.rectangle([0, gy, cw, gy + line_w], fill=(213, 232, 220, 104))
     gy += sy
 # small nodes at intersections
 gx = 0.0
 while gx < cw:
     gy = 0.0
     while gy < ch:
-        gd.ellipse([gx - 1.8, gy - 1.8, gx + 3.8, gy + 3.8], fill=(225, 240, 230, 200))
+        gd.ellipse([gx - 1.8, gy - 1.8, gx + 3.8, gy + 3.8], fill=(225, 240, 230, 150))
         gy += sy
     gx += sx
 grid_arr = np.asarray(grid).astype(np.float32)
 # subtle darker water fill inside basin
 fill = np.zeros((ch, cw, 4), dtype=np.float32)
 fill[..., 0], fill[..., 1], fill[..., 2] = 10, 46, 38
-fill[..., 3] = basin.astype(np.float32) * 36
+fill[..., 3] = basin.astype(np.float32) * 26
 grid_arr[..., 3] *= basin
 combined = np.maximum(fill, grid_arr)
 Image.fromarray(combined.astype(np.uint8), "RGBA").save(
