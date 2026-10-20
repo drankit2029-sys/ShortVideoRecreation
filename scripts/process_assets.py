@@ -136,6 +136,12 @@ ocean_col = ocean_base[None, None, :] * ocean_tone[..., None] * np.clip(0.93 + 0
 
 out = np.where(land[..., None], land_col, ocean_col)
 out = np.clip((out - 0.5) * 1.05 + 0.5, 0, 1)
+# bright polar ice cap (reference shows a clean white Antarctica strip)
+_lats = np.linspace(90.0, -90.0, out.shape[0])[:, None]
+_ice = np.clip((-60.0 - _lats) / 6.0, 0.0, 1.0)[..., None]
+_ice = _ice * _ice * (3 - 2 * _ice)
+_ice_col = np.array([0.93, 0.955, 0.945], dtype=np.float32)[None, None, :]
+out = out * (1 - _ice) + _ice_col * _ice
 Image.fromarray((out * 255).astype(np.uint8)).save(
     PROC / "earth-graded.jpg", quality=93, subsampling=0
 )
