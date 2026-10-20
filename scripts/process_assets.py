@@ -90,8 +90,11 @@ blum = 0.299 * bma[..., 0] + 0.587 * bma[..., 1] + 0.114 * bma[..., 2]
 _bl = Image.fromarray((np.clip(blum, 0, 1) * 255).astype(np.uint8))
 blum_s = np.asarray(_bl.filter(ImageFilter.GaussianBlur(2.0))).astype(np.float32) / 255.0
 
-# ocean mask from topo colors (blue-dominant, not dark forests / not snow)
-ocean = ((tB - tR) > 0.04) & (tlum < 0.45)
+# ocean mask from topo colors (blue-dominant, not dark forests / not snow);
+# deep ocean reads near-black in the topo bathy imagery, so also take very
+# dark blue-marble pixels (otherwise the southern Indian Ocean is taken for
+# land and the asia fill paints a hard olive cap)
+ocean = (((tB - tR) > 0.04) & (tlum < 0.45)) | (blum < 0.14)
 land = ~ocean
 _li = Image.fromarray((land * 255).astype(np.uint8), "L")
 _li = _li.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(3))
@@ -205,7 +208,7 @@ print(f"  coast-glow.png {coast.size} ({(PROC / 'coast-glow.png').stat().st_size
 
 print("[3/8] basin grid overlay")
 # ~3.5-degree lat/lng grid inside basin (aligned to meridians/parallels)
-step_deg = 10.0
+step_deg = 12.0
 sx = W / 360.0 * step_deg
 sy = H / 180.0 * step_deg
 line_w = 3

@@ -711,13 +711,13 @@
 
         /* US flag-map cutouts */
         const flagAnchors = [
-          [9, 60],
-          [9, 79],
-          [1, 58],
-          [1, 77],
-          [-8, 54],
-          [-8, 73],
-          [-8, 92],
+          [9, 66],
+          [9, 85],
+          [1, 64],
+          [1, 83],
+          [-8, 60],
+          [-8, 79],
+          [-8, 96],
         ];
         const flagGeo = new THREE.PlaneGeometry(0.27, (0.27 * 466) / 984);
         for (const [lat, lng] of flagAnchors) {
@@ -737,10 +737,10 @@
         }
 
         /* moons + shadows */
-        const moonGeo = new THREE.SphereGeometry(0.088, 48, 32);
+        const moonGeo = new THREE.SphereGeometry(0.095, 48, 32);
         const moonSpots = [
-          [2.5, 88],
-          [2.5, 100],
+          [2.5, 84.5],
+          [2.5, 101.5],
         ];
         for (const [lat, lng] of moonSpots) {
           const mat = new THREE.MeshBasicMaterial({ map: BASE.moon });
