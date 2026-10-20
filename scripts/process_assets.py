@@ -134,6 +134,9 @@ Image.fromarray((out * 255).astype(np.uint8)).save(
     PROC / "earth-graded.jpg", quality=93, subsampling=0
 )
 print(f"  saved earth-graded.jpg ({(PROC / 'earth-graded.jpg').stat().st_size} bytes)")
+# water mask for selective ocean grading in the post shader
+Image.fromarray((~land).astype(np.uint8) * 255, "L").save(PROC / "water-mask.png")
+print("  saved water-mask.png")
 
 
 # ------------------------------------------------------- basin crop helpers
@@ -201,11 +204,11 @@ print(f"  coast-glow.png {coast.size} ({(PROC / 'coast-glow.png').stat().st_size
 
 
 print("[3/8] basin grid overlay")
-# 5-degree lat/lng grid inside basin (aligned to meridians/parallels)
-step_deg = 5.0
-sx = W / 360.0 * step_deg  # px per step in x (75px at 5400)
+# ~3.5-degree lat/lng grid inside basin (aligned to meridians/parallels)
+step_deg = 3.5
+sx = W / 360.0 * step_deg
 sy = H / 180.0 * step_deg
-line_w = 4
+line_w = 3
 grid = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
 gd = ImageDraw.Draw(grid)
 gx = 0.0
@@ -221,7 +224,7 @@ gx = 0.0
 while gx < cw:
     gy = 0.0
     while gy < ch:
-        gd.ellipse([gx - 2.5, gy - 2.5, gx + 5.5, gy + 5.5], fill=(225, 240, 230, 200))
+        gd.ellipse([gx - 1.8, gy - 1.8, gx + 3.8, gy + 3.8], fill=(225, 240, 230, 200))
         gy += sy
     gx += sx
 grid_arr = np.asarray(grid).astype(np.float32)
