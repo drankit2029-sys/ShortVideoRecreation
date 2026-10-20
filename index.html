@@ -227,6 +227,7 @@
         transform-origin: 50% 50%;
       }
       .blk .ic {
+        position: relative;
         width: 46px;
         height: 46px;
         flex: 0 0 46px;
@@ -556,6 +557,191 @@
         background-size: 160px 160px;
       }
 
+      /* ---------------------------------------------------- script VFX */
+      #neutralWash {
+        position: absolute;
+        inset: 0;
+        z-index: 24;
+        opacity: 0;
+        pointer-events: none;
+        background: linear-gradient(180deg, #7d8598 0%, #a9b0bd 100%);
+        mix-blend-mode: saturation;
+      }
+      #blackout {
+        position: absolute;
+        inset: 0;
+        z-index: 45;
+        background: #04050a;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #powerline {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 958px;
+        height: 4px;
+        z-index: 46;
+        opacity: 0;
+        pointer-events: none;
+        background: #eafffb;
+        box-shadow:
+          0 0 26px 8px rgba(0, 245, 212, 0.8),
+          0 0 90px 22px rgba(0, 245, 212, 0.35);
+        transform: scaleX(0);
+      }
+      #converge,
+      #sparks { position: absolute; inset: 0; pointer-events: none; }
+      #converge { z-index: 12; }
+      #converge span,
+      #sparks span { position: absolute; border-radius: 50%; }
+      #converge span {
+        width: 8px;
+        height: 8px;
+        background: #00f5d4;
+        box-shadow: 0 0 14px rgba(0, 245, 212, 0.9);
+      }
+      #sparks { z-index: 22; }
+      #sparks span { background: #b9fff4; box-shadow: 0 0 12px rgba(0, 245, 212, 0.9); }
+      #threatRingA,
+      #threatRingB,
+      #ctaRing {
+        position: absolute;
+        left: 540px;
+        top: 900px;
+        width: 380px;
+        height: 380px;
+        margin: -190px 0 0 -190px;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #threatRingA,
+      #threatRingB {
+        z-index: 18;
+        border: 2.5px solid rgba(255, 77, 109, 0.8);
+        box-shadow: 0 0 40px rgba(255, 77, 109, 0.35);
+      }
+      #ctaRing {
+        top: 1122px;
+        z-index: 21;
+        border: 3px solid rgba(0, 245, 212, 0.75);
+        box-shadow: 0 0 46px rgba(0, 245, 212, 0.4);
+      }
+      #trail {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 6px;
+        margin-top: -3px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, rgba(0, 245, 212, 0.04), rgba(0, 245, 212, 0.6));
+        box-shadow: 0 0 18px rgba(0, 245, 212, 0.35);
+        transform-origin: 0 50%;
+        transform: scaleX(0);
+      }
+      #reticle {
+        position: absolute;
+        inset: 58px;
+        z-index: 7;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #reticle i {
+        position: absolute;
+        width: 58px;
+        height: 58px;
+        border: 0 solid rgba(255, 183, 3, 0.85);
+      }
+      #reticle i:nth-child(1) { left: 0; top: 0; border-left-width: 3px; border-top-width: 3px; }
+      #reticle i:nth-child(2) { right: 0; top: 0; border-right-width: 3px; border-top-width: 3px; }
+      #reticle i:nth-child(3) { left: 0; bottom: 0; border-left-width: 3px; border-bottom-width: 3px; }
+      #reticle i:nth-child(4) { right: 0; bottom: 0; border-right-width: 3px; border-bottom-width: 3px; }
+      #badge {
+        position: absolute;
+        right: 44px;
+        top: 30px;
+        z-index: 8;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 16px 9px 13px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 183, 3, 0.55);
+        background: rgba(255, 183, 3, 0.12);
+        color: #ffd166;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0;
+        pointer-events: none;
+        box-shadow: 0 0 24px rgba(255, 183, 3, 0.18);
+      }
+      #badge svg { width: 18px; height: 18px; }
+      #echo1,
+      #echo2,
+      #echo3 {
+        position: absolute;
+        left: 100px;
+        top: 590px;
+        width: 880px;
+        height: 620px;
+        border-radius: 44px;
+        border: 1.5px solid rgba(0, 245, 212, 0.3);
+        background: rgba(0, 245, 212, 0.015);
+        opacity: 0;
+        pointer-events: none;
+      }
+      #blockSweep {
+        position: absolute;
+        left: -30%;
+        top: -20%;
+        width: 160%;
+        height: 140%;
+        z-index: 2;
+        opacity: 0;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        background: linear-gradient(
+          115deg,
+          rgba(255, 255, 255, 0) 42%,
+          rgba(255, 255, 255, 0.14) 50%,
+          rgba(255, 255, 255, 0) 58%
+        );
+        transform: translateX(-60%);
+      }
+      #threatScan {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -8px;
+        height: 3px;
+        z-index: 1;
+        opacity: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 77, 109, 0) 0%,
+          rgba(255, 77, 109, 0.9) 20%,
+          rgba(255, 130, 150, 1) 50%,
+          rgba(255, 77, 109, 0.9) 80%,
+          rgba(255, 77, 109, 0) 100%
+        );
+        box-shadow: 0 0 18px rgba(255, 77, 109, 0.55);
+      }
+      .ping {
+        position: absolute;
+        inset: 0;
+        border-radius: 13px;
+        border: 2px solid rgba(255, 183, 3, 0.8);
+        opacity: 0;
+        pointer-events: none;
+      }
+      #blk3 .ping { border-color: rgba(181, 123, 240, 0.9); }
+      #blk3 .ic svg { transform-origin: 12px 12px; }
+
       /* --------------------------------------------------- digital texture */
       #bgDots {
         position: absolute;
@@ -667,9 +853,20 @@
           <div id="float">
             <div id="glowpool"></div>
 
+            <div data-layout-allow-occlusion id="echo3"></div>
+            <div data-layout-allow-occlusion id="echo2"></div>
+            <div data-layout-allow-occlusion id="echo1"></div>
+
             <div id="card">
               <div id="cardBg"></div>
               <div id="chrome"><i></i><i></i><i></i><span class="pill"></span></div>
+              <div data-layout-allow-occlusion id="badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ffd166" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4.5" y="10.5" width="15" height="10" rx="2.2" />
+                  <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" />
+                </svg>
+                OWNERSHIP LOCKED
+              </div>
 
               <div id="card14">
                 <div id="n14">14</div>
@@ -681,7 +878,8 @@
                 <div id="fillAmber"></div>
               </div>
 
-              <div id="gridlines"></div>
+              <div data-layout-allow-occlusion id="gridlines"></div>
+              <div data-layout-allow-occlusion id="threatScan"></div>
 
               <div id="blocks">
                 <div class="blk" id="blk1">
@@ -703,6 +901,8 @@
                       <circle cx="12" cy="18" r="2.4" />
                       <path d="M7.6 6h8.8M6.2 8.2l4.6 7.6M17.8 8.2l-4.6 7.6" />
                     </svg>
+                    <span class="ping"></span>
+                    <span class="ping"></span>
                   </div>
                   <div class="lb" data-layout-allow-occlusion>Web flows</div>
                   <div class="ok" data-layout-allow-occlusion>&#10003;</div>
@@ -713,11 +913,14 @@
                       <circle cx="12" cy="12" r="3.4" />
                       <path d="M12 2.6v3.2M12 18.2v3.2M21.4 12h-3.2M5.8 12H2.6M18.6 5.4l-2.3 2.3M7.7 16.3l-2.3 2.3M18.6 18.6l-2.3-2.3M7.7 7.7L5.4 5.4" />
                     </svg>
+                    <span class="ping"></span>
                   </div>
                   <div class="lb" data-layout-allow-occlusion>Automations</div>
                   <div class="ok" data-layout-allow-occlusion>&#10003;</div>
                 </div>
               </div>
+
+              <div data-layout-allow-occlusion id="blockSweep"></div>
 
               <button id="keepBtn" data-layout-allow-occlusion><span>KEEP MY WORKSPACE</span><span class="ck">&#10003;</span></button>
 
@@ -725,6 +928,7 @@
               <div id="screenFX"></div>
               <div id="scanSweep"></div>
               <div id="hud"><i></i><i></i><i></i><i></i></div>
+              <div data-layout-allow-occlusion id="reticle"><i></i><i></i><i></i><i></i></div>
             </div>
 
             <div id="neon">
@@ -736,6 +940,7 @@
             </div>
 
             <div id="bar-ui">
+              <div data-layout-allow-occlusion id="trail"></div>
               <div class="tick" id="tick3" style="left: 188.57px"><div class="tl">3</div></div>
               <div class="tick" id="tick7" style="left: 440px"><div class="tl">7</div></div>
               <div class="tick" id="tick14" style="left: 880px"><div class="tl">14</div></div>
@@ -745,6 +950,7 @@
         </div>
       </div>
 
+      <div data-layout-allow-occlusion id="converge"></div>
       <div data-layout-allow-occlusion id="shockwave"></div>
       <div data-layout-allow-occlusion class="ripple" id="ripA"></div>
       <div data-layout-allow-occlusion class="ripple" id="ripB"></div>
@@ -756,8 +962,15 @@
       </div>
 
       <div data-layout-allow-occlusion id="focusDim"></div>
+      <div data-layout-allow-occlusion id="neutralWash"></div>
       <div data-layout-allow-occlusion id="threat"></div>
+      <div data-layout-allow-occlusion id="threatRingA"></div>
+      <div data-layout-allow-occlusion id="threatRingB"></div>
+      <div data-layout-allow-occlusion id="ctaRing"></div>
+      <div data-layout-allow-occlusion id="sparks"></div>
       <div data-layout-allow-occlusion id="bloom"></div>
+      <div data-layout-allow-occlusion id="blackout"></div>
+      <div data-layout-allow-occlusion id="powerline"></div>
       <div data-layout-allow-occlusion id="capBand"></div>
       <div data-layout-allow-occlusion id="vignette"></div>
       <div data-layout-allow-occlusion id="grain"></div>
@@ -849,6 +1062,38 @@
             dust.appendChild(d);
           }
 
+          var conv = $("#converge");
+          var convSpans = [];
+          for (var ci = 0; ci < 14; ci++) {
+            var cs = document.createElement("span");
+            var ca = (ci / 14) * Math.PI * 2 + rnd() * 0.35;
+            var cr = 360 + rnd() * 430;
+            cs.style.left = "540px";
+            cs.style.top = "900px";
+            cs.style.width = cs.style.height = (5 + rnd() * 7).toFixed(1) + "px";
+            cs.__sx = Math.cos(ca) * cr;
+            cs.__sy = Math.sin(ca) * cr * 0.86;
+            conv.appendChild(cs);
+            convSpans.push(cs);
+          }
+
+          var sparkWrap = $("#sparks");
+          var sparkSpans = [];
+          for (var si = 0; si < 20; si++) {
+            var sk = document.createElement("span");
+            var sa = (si / 20) * Math.PI * 2 + rnd() * 0.18;
+            var sr = 70 + rnd() * 165;
+            sk.style.left = "540px";
+            sk.style.top = "1122px";
+            sk.style.width = sk.style.height = (4 + rnd() * 8).toFixed(1) + "px";
+            sk.__dx = Math.cos(sa) * sr;
+            sk.__dy = Math.sin(sa) * sr * 0.8 - 40;
+            sparkWrap.appendChild(sk);
+            sparkSpans.push(sk);
+          }
+          convSpans.forEach(function (cs) { gsap.set(cs, { opacity: 0 }); });
+          sparkSpans.forEach(function (sk) { gsap.set(sk, { opacity: 0 }); });
+
           var nc = document.createElement("canvas");
           nc.width = nc.height = 160;
           var ng = nc.getContext("2d");
@@ -934,6 +1179,20 @@
           gsap.set("#static", { opacity: 0 });
           gsap.set("#crossLX", { scaleX: 0, opacity: 0 });
           gsap.set("#crossLY", { scaleY: 0, opacity: 0 });
+          gsap.set("#echo1", { z: -80, y: 26 });
+          gsap.set("#echo2", { z: -160, y: 56 });
+          gsap.set("#echo3", { z: -240, y: 86 });
+          gsap.set("#trail", { scaleX: 0 });
+          gsap.set("#reticle", { opacity: 0 });
+          gsap.set("#badge", { opacity: 0, scale: 1.35, rotate: -4, y: 0 });
+          gsap.set("#powerline", { scaleX: 0, opacity: 0 });
+          gsap.set("#threatRingA", { scale: 0.35, opacity: 0 });
+          gsap.set("#threatRingB", { scale: 0.35, opacity: 0 });
+          gsap.set("#ctaRing", { scale: 0.35, opacity: 0 });
+          gsap.set("#neutralWash", { opacity: 0 });
+          gsap.set("#blackout", { opacity: 0 });
+          gsap.set("#threatScan", { opacity: 0 });
+          gsap.set("#blockSweep", { opacity: 0 });
 
           /* scene 1 — flip in, 14 locks */
           tl.to("#ambient", { opacity: 1, duration: 2.2, ease: "power2.out" }, 0.05);
@@ -943,6 +1202,14 @@
           tl.to("#glare", { opacity: 0, duration: 0.35 }, 1.9);
           tl.to("#n14", { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.62, ease: "power3.out" }, 2.45);
           tl.to("#trial-label", { opacity: 1, y: 0, scale: 1, duration: 0.85, ease: "power2.out" }, 2.78);
+          convSpans.forEach(function (cs, i) {
+            var ct = 1.62 + i * 0.035;
+            tl.fromTo(cs, { x: cs.__sx, y: cs.__sy, opacity: 0, scale: 0.5 },
+              { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.62, ease: "power2.in", immediateRender: false }, ct);
+            tl.to(cs, { opacity: 0, scale: 0.3, duration: 0.14, ease: "none" }, ct + 0.62);
+          });
+          tl.fromTo("#shockwave", { scale: 0.35, opacity: 0.5 },
+            { scale: 1.15, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, 2.42);
           tl.to({}, { duration: 0.01 }, 4.26);
 
           /* scene 2 — card becomes a progress track */
@@ -976,6 +1243,27 @@
           tl.to("#dot", { scale: 1, duration: 0.22, ease: "power2.out" }, 8.12);
           tl.to("#bar-ui", { opacity: 0, duration: 0.16, ease: "none" }, 8.26);
           tl.to("#fills", { opacity: 0, duration: 0.3 }, 8.3);
+          tl.to("#trail", { scaleX: 0.2143, duration: 0.82, ease: "power2.inOut" }, 4.78);
+          tl.to("#trail", { scaleX: 0.5, duration: 0.72, ease: "power2.inOut" }, 5.86);
+          tl.to("#trail", { scaleX: 1, duration: 1.1, ease: "power2.in" }, 6.98);
+          tl.fromTo("#tick3", { backgroundColor: "rgba(0,245,212,0.95)" },
+            { backgroundColor: "rgba(244,247,246,0.22)", duration: 0.55, ease: "power2.out", immediateRender: false }, 5.56);
+          tl.fromTo("#tick7", { backgroundColor: "rgba(0,245,212,0.95)" },
+            { backgroundColor: "rgba(244,247,246,0.22)", duration: 0.55, ease: "power2.out", immediateRender: false }, 6.56);
+          tl.fromTo("#tick14", { backgroundColor: "rgba(255,183,3,0.95)" },
+            { backgroundColor: "rgba(244,247,246,0.22)", duration: 0.55, ease: "power2.out", immediateRender: false }, 7.75);
+          tl.fromTo("#tick3", { boxShadow: "0 0 0 rgba(0,245,212,0)" },
+            { boxShadow: "0 0 18px 2px rgba(0,245,212,0.7)", duration: 0.18, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 5.56);
+          tl.fromTo("#tick7", { boxShadow: "0 0 0 rgba(0,245,212,0)" },
+            { boxShadow: "0 0 18px 2px rgba(0,245,212,0.7)", duration: 0.18, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 6.56);
+          tl.fromTo("#tick14", { boxShadow: "0 0 0 rgba(255,183,3,0)" },
+            { boxShadow: "0 0 18px 2px rgba(255,183,3,0.75)", duration: 0.18, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 7.75);
+          tl.to("#dot", { scale: 1.24, duration: 0.08, ease: "power2.out" }, 5.56);
+          tl.to("#dot", { scale: 1, duration: 0.2, ease: "power2.out" }, 5.66);
+          tl.to("#dot", { scale: 1.24, duration: 0.08, ease: "power2.out" }, 6.56);
+          tl.to("#dot", { scale: 1, duration: 0.2, ease: "power2.out" }, 6.66);
+          tl.to("#dot", { scale: 1.24, duration: 0.08, ease: "power2.out" }, 7.75);
+          tl.to("#dot", { scale: 1, duration: 0.18, ease: "power2.out" }, 7.83);
 
           /* scene 3 — re-expand, neon border latches */
           tl.to("#card", { height: 620, y: 0, borderRadius: 44, duration: 0.82, ease: "power3.inOut" }, 8.35);
@@ -991,6 +1279,17 @@
           tl.to("#neon", { opacity: 0.86, duration: 0.2 }, 11.15);
           tl.to("#focusDim", { opacity: 1, duration: 1.15, ease: "power2.out" }, 11.25);
           tl.fromTo("#shockwave", { scale: 0.55, opacity: 0.65 }, { scale: 1.9, opacity: 0, duration: 1.2, ease: "power2.out", immediateRender: false }, 11.24);
+          tl.fromTo("#reticle", { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "none", immediateRender: false }, 10.4);
+          tl.fromTo("#reticle i:nth-child(1)", { x: -30, y: -30 }, { x: 0, y: 0, duration: 0.52, ease: "expo.out", immediateRender: false }, 10.42);
+          tl.fromTo("#reticle i:nth-child(2)", { x: 30, y: -30 }, { x: 0, y: 0, duration: 0.52, ease: "expo.out", immediateRender: false }, 10.46);
+          tl.fromTo("#reticle i:nth-child(3)", { x: -30, y: 30 }, { x: 0, y: 0, duration: 0.52, ease: "expo.out", immediateRender: false }, 10.5);
+          tl.fromTo("#reticle i:nth-child(4)", { x: 30, y: 30 }, { x: 0, y: 0, duration: 0.52, ease: "expo.out", immediateRender: false }, 10.54);
+          tl.to("#reticle", { opacity: 0, duration: 0.32, ease: "power2.in" }, 11.46);
+          tl.to("#badge", { opacity: 1, scale: 1, rotate: 0, duration: 0.4, ease: "back.out(2.2)" }, 11.2);
+          tl.fromTo("#badge", { boxShadow: "0 0 24px rgba(255,183,3,0.18)" },
+            { boxShadow: "0 0 44px rgba(255,183,3,0.65)", duration: 0.2, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 11.24);
+          tl.to("#badge", { opacity: 0, y: -10, duration: 0.3, ease: "power2.in" }, 14.28);
+          tl.to("#badge", { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 42.1);
 
           /* scene 4 — cursor clicks an empty product */
           tl.to("#gridlines", { opacity: 1, duration: 0.9, ease: "power2.out" }, 14.5);
@@ -1006,6 +1305,12 @@
           tl.to("#cursor", { opacity: 0, duration: 0.25, ease: "none" }, 18.72);
           tl.to("#gridlines", { opacity: 0.6, duration: 2.2, ease: "sine.inOut" }, 19.4);
           tl.to("#gridlines", { opacity: 0.82, duration: 1.6, ease: "sine.inOut" }, 21.6);
+          tl.to("#neutralWash", { opacity: 0.34, duration: 0.6, ease: "power2.out" }, 14.4);
+          tl.to("#neutralWash", { opacity: 0, duration: 1.0, ease: "power2.inOut" }, 26.5);
+          tl.to("#space", { scale: 1.03, duration: 8.8, ease: "sine.inOut" }, 14.4);
+          tl.to("#space", { scale: 1, duration: 1.1, ease: "sine.inOut" }, 27.45);
+          tl.to("#space", { scale: 1.018, duration: 0.9, ease: "sine.inOut" }, 28.9);
+          tl.to("#space", { scale: 1, duration: 1.0, ease: "sine.inOut" }, 33.4);
 
           /* scene 5 — trial ends, card dismissed */
           tl.to("#float", { x: -1250, rotate: -3, opacity: 0, duration: 0.72, ease: "power3.in" }, 23.35);
@@ -1013,6 +1318,18 @@
           tl.set("#float", { x: -1250, rotate: 0, opacity: 1 }, 27.05);
           tl.to("#float", { x: 0, duration: 0.82, ease: "power4.out" }, 27.1);
           tl.to("#gridlines", { opacity: 0.35, duration: 0.8, ease: "power2.out" }, 27.4);
+          tl.to("#blackout", { opacity: 0.55, duration: 0.09, ease: "none" }, 23.3);
+          tl.to("#blackout", { opacity: 0, duration: 0.34, ease: "power2.out" }, 23.42);
+          tl.fromTo("#powerline", { scaleX: 1, opacity: 1 },
+            { scaleX: 0, opacity: 0.25, duration: 0.3, ease: "power2.in", immediateRender: false }, 23.33);
+          tl.to("#powerline", { opacity: 0, duration: 0.1, ease: "none" }, 23.64);
+          tl.to("#blackout", { opacity: 0.4, duration: 0.07, ease: "none" }, 27.0);
+          tl.to("#blackout", { opacity: 0, duration: 0.3, ease: "power2.out" }, 27.1);
+          tl.fromTo("#powerline", { scaleX: 0, opacity: 0 },
+            { scaleX: 1, opacity: 0.9, duration: 0.2, ease: "power2.out", immediateRender: false }, 27.06);
+          tl.to("#powerline", { opacity: 0, duration: 0.22, ease: "power2.in" }, 27.28);
+          tl.to("#card", { filter: "brightness(1.45)", duration: 0.08, ease: "none" }, 27.06);
+          tl.to("#card", { filter: "brightness(1)", duration: 0.4, ease: "power2.out" }, 27.15);
 
           /* scene 6 — the workspace builds up */
           tl.to("#blk1", { opacity: 1, scale: 1, y: 0, duration: 0.52, ease: "back.out(2.1)" }, 28.9);
@@ -1021,10 +1338,28 @@
           tl.to("#blk2 .ok", { opacity: 1, duration: 0.22 }, 30.9);
           tl.to("#blk3", { opacity: 1, scale: 1, y: 0, duration: 0.52, ease: "back.out(2.1)" }, 32.3);
           tl.to("#blk3 .ok", { opacity: 1, duration: 0.22 }, 32.6);
-          tl.to("#neon", { opacity: 0.62, duration: 0.9, ease: "power2.inOut" }, 33.4);
+          tl.fromTo("#blk1 .ic", { boxShadow: "0 0 0 rgba(0,245,212,0)" },
+            { boxShadow: "0 0 30px rgba(0,245,212,0.6)", duration: 0.35, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 29.25);
+          tl.fromTo("#blk2 .ping:nth-of-type(1)", { scale: 0.4, opacity: 0.9 },
+            { scale: 1.9, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, 30.72);
+          tl.fromTo("#blk2 .ping:nth-of-type(2)", { scale: 0.4, opacity: 0.7 },
+            { scale: 2.35, opacity: 0, duration: 1.0, ease: "power2.out", immediateRender: false }, 31.05);
+          tl.fromTo("#blk3 .ping", { scale: 0.4, opacity: 0.9 },
+            { scale: 1.9, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, 32.42);
+          tl.fromTo("#blk3 .ic svg", { rotate: 0 },
+            { rotate: 90, duration: 0.7, ease: "back.out(2)", immediateRender: false }, 32.42);
+          tl.to("#blockSweep", { opacity: 1, duration: 0.18, ease: "none" }, 33.26);
+          tl.fromTo("#blockSweep", { x: "-60%" },
+            { x: "60%", duration: 0.95, ease: "power2.inOut", immediateRender: false }, 33.3);
+          tl.to("#blockSweep", { opacity: 0, duration: 0.2, ease: "none" }, 34.05);
+          tl.to("#neon", { opacity: 1, duration: 0.1, ease: "none" }, 33.28);
+          tl.to("#neon", { opacity: 0.62, duration: 0.9, ease: "power2.inOut" }, 33.55);
 
           /* scene 7 — the one 2.5D tilt */
           tl.to("#tilt", { rotateX: 26, y: 46, scale: 1.02, duration: 2.0, ease: "power2.inOut" }, 34.4);
+          tl.to("#echo1", { opacity: 0.4, duration: 0.4, ease: "power2.out" }, 34.5);
+          tl.to("#echo2", { opacity: 0.26, duration: 0.45, ease: "power2.out" }, 34.56);
+          tl.to("#echo3", { opacity: 0.15, duration: 0.5, ease: "power2.out" }, 34.62);
           tl.to("#glowpool", { opacity: 1, duration: 1.8, ease: "power2.out" }, 34.5);
           tl.to("#neon", { opacity: 1, duration: 1.4, ease: "power2.inOut" }, 36.2);
 
@@ -1051,6 +1386,20 @@
           tl.to("#threat", { opacity: 0, duration: 0.5, ease: "power2.out" }, 42.05);
           tl.to("#bloom", { opacity: 0.8, duration: 0.18, ease: "none" }, 42.02);
           tl.to("#bloom", { opacity: 0, duration: 0.95, ease: "power2.out" }, 42.2);
+          tl.fromTo("#threatRingA", { scale: 0.4, opacity: 0.6 },
+            { scale: 2.3, opacity: 0, duration: 1.1, ease: "power2.out", immediateRender: false }, 38.85);
+          tl.fromTo("#threatRingB", { scale: 0.5, opacity: 0.45 },
+            { scale: 1.8, opacity: 0, duration: 1.0, ease: "power2.out", immediateRender: false }, 39.6);
+          tl.fromTo("#threatScan", { y: -10, opacity: 0 },
+            { y: 636, opacity: 0.9, duration: 0.75, ease: "none", repeat: 2, immediateRender: false }, 38.9);
+          tl.to("#threatScan", { opacity: 0, duration: 0.2, ease: "none" }, 41.16);
+          tl.fromTo("#ctaRing", { scale: 0.5, opacity: 0.75 },
+            { scale: 2.1, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, 41.95);
+          sparkSpans.forEach(function (sk, i) {
+            tl.fromTo(sk, { x: 0, y: 0, opacity: 0, scale: 1 },
+              { x: sk.__dx, y: sk.__dy, opacity: 0.95, scale: 1, duration: 0.14, ease: "power2.out", immediateRender: false }, 41.98 + i * 0.008);
+            tl.to(sk, { x: sk.__dx * 1.25, y: sk.__dy * 1.25 + 26, opacity: 0, scale: 0.3, duration: 0.55, ease: "power2.in" }, 42.12 + i * 0.008);
+          });
           tl.to("#focusDim", { opacity: 0.25, duration: 2.4, ease: "power2.out" }, 42.1);
           tl.to("#cursor", { opacity: 0, duration: 0.3, ease: "none" }, 42.5);
           tl.to("#keepBtn", { boxShadow: "0 24px 70px rgba(0,245,212,0.5), 0 0 0 1px rgba(255,255,255,0.35) inset", duration: 1.0, ease: "power2.out" }, 42.3);
