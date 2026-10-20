@@ -177,7 +177,7 @@
         will-change: transform, opacity;
       }
 
-      /* 3rd */
+      .t-white { color: #dcebe0; }
       #t-third {
         font-size: 155px;
         margin-top: 58px;
@@ -305,7 +305,7 @@
         </div>
 
         <div class="center-box" id="t-third-wrap" style="opacity: 0">
-          <div id="t-third">3<sup>rd</sup></div>
+          <div id="t-third"><span class="t-white">3</span><sup>rd</sup></div>
         </div>
 
         <div id="t-area-wrap" style="position: absolute; left: 0; top: 0; opacity: 0">
@@ -317,7 +317,7 @@
 
         <div id="t-pct-wrap" style="opacity: 0">
           <div id="pct-halo"></div>
-          <div id="t-pct">0%</div>
+          <div id="t-pct"><span id="pct-num" class="t-white">0</span><span class="pct-sym">%</span></div>
         </div>
 
         <div class="center-box" id="t-15x-wrap" style="opacity: 0">
@@ -711,13 +711,13 @@
 
         /* US flag-map cutouts */
         const flagAnchors = [
-          [9, 66],
-          [9, 85],
-          [1, 64],
-          [1, 83],
-          [-8, 60],
-          [-8, 79],
-          [-8, 96],
+          [12, 72],
+          [12, 91],
+          [4, 70],
+          [4, 89],
+          [-5, 66],
+          [-5, 85],
+          [-5, 102],
         ];
         const flagGeo = new THREE.PlaneGeometry(0.27, (0.27 * 466) / 984);
         for (const [lat, lng] of flagAnchors) {
@@ -737,14 +737,14 @@
         }
 
         /* moons + shadows */
-        const moonGeo = new THREE.SphereGeometry(0.095, 48, 32);
+        const moonGeo = new THREE.SphereGeometry(0.105, 48, 32);
         const moonSpots = [
-          [2.5, 84.5],
-          [2.5, 101.5],
+          [4, 91.5],
+          [4, 108.5],
         ];
         for (const [lat, lng] of moonSpots) {
           const mat = new THREE.MeshBasicMaterial({ map: BASE.moon });
-          mat.color.setScalar(0.95);
+          mat.color.setScalar(1.3);
           const mesh = new THREE.Mesh(moonGeo, mat);
           mesh.userData.anchor = llToVec(lat, lng, 1.002);
           mesh.visible = false;
@@ -758,7 +758,7 @@
           depthWrite: false,
         });
         moonShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.40, 0.26), shMat);
-        moonShadow.userData.anchor = llToVec(2, 94, 1.004);
+        moonShadow.userData.anchor = llToVec(4, 100, 1.004);
         moonShadow.visible = false;
         moonShadow.renderOrder = 3;
         scene.add(moonShadow);
@@ -793,10 +793,11 @@
         { t: 11.45, lat: -8, lng: 87, alt: 1.7, pitch: 4, ease: "power2.in" },
         { t: 11.95, lat: -2, lng: 97, alt: 1.5, pitch: 6, ease: "power2.out" },
         { t: 16.05, lat: 12, lng: 48, alt: 1.45, pitch: 0, ease: "power3.out" },
-        { t: 16.55, lat: 9, lng: 62, alt: 1.55, pitch: 1, ease: "sine.inOut" },
+        { t: 16.55, lat: 9, lng: 63, alt: 1.33, pitch: 1, ease: "sine.inOut" },
+        { t: 17.6, lat: 7, lng: 68, alt: 1.22, pitch: 2, ease: "sine.inOut" },
         { t: 19.45, lat: 1, lng: 76, alt: 1.6, pitch: 3, ease: "power2.inOut" },
         { t: 20.3, lat: 0.5, lng: 79, alt: 1.55, pitch: 3, ease: "sine.inOut" },
-        { t: 21.7, lat: 10, lng: 94, alt: 1.7, pitch: 5, ease: "power2.out" },
+        { t: 21.7, lat: 20, lng: 103, alt: 1.5, pitch: 5, ease: "power2.out" },
         { t: 22.9, lat: 17, lng: 99, alt: 1.75, pitch: 6, ease: "sine.out" },
         { t: 23.25, lat: 17, lng: 99, alt: 1.75, pitch: 6, ease: "sine.inOut" },
         { t: 25.25, lat: 14, lng: 102, alt: 1.68, pitch: 6, ease: "power3.inOut" },
@@ -883,16 +884,16 @@
         tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
 
         /* ---- title ---- */
-        const ind = buildWord($("word-indian"), "INDIAN", 22, 56);
-        const oce = buildWord($("word-ocean"), "OCEAN", 24, 46);
+        const ind = buildWord($("word-indian"), "INDIAN", 6, 16);
+        const oce = buildWord($("word-ocean"), "OCEAN", 7, 14);
         const titleAll = ind.concat(oce);
         tl.set("#t-title", { opacity: 1 }, 2.5);
         titleAll.forEach((el, i) => {
-          const at = i < 6 ? 2.58 + i * 0.085 : 3.28 + (i - 6) * 0.11;
+          const at = i < 6 ? 2.52 + i * 0.05 : 2.95 + (i - 6) * 0.05;
           tl.fromTo(
             el,
-            { opacity: 0, y: 96, scale: 0.86 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.52, ease: "power3.out" },
+            { opacity: 0, y: 40, scale: 0.94 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.34, ease: "power3.out" },
             at,
           );
         });
@@ -996,7 +997,7 @@
             duration: 2.2,
             ease: "power4.out",
             onUpdate: () => {
-              $("t-pct").textContent = Math.round(pct.v) + "%";
+              $("pct-num").textContent = Math.round(pct.v);
             },
           },
           12.1,
@@ -1162,7 +1163,7 @@
         if (gridOn) {
           setReveal(gridShell.material, boxUv.cu, boxUv.cv, revealK(t, 5.9, 6.9, 3.8));
           gridShell.material.opacity =
-            0.8 * win(t, 5.9, 6.25) * (1 - win(t, 11.9, 12.2));
+            0.62 * win(t, 5.9, 6.25) * (1 - win(t, 11.9, 12.2));
         }
         const asiaOn = t > 22.88 && t < 25.45;
         asiaShell.visible = asiaOn;
