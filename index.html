@@ -687,8 +687,8 @@
         width: 880px;
         height: 620px;
         border-radius: 44px;
-        border: 1.5px solid rgba(0, 245, 212, 0.3);
-        background: rgba(0, 245, 212, 0.015);
+        border: 2px solid rgba(0, 245, 212, 0.38);
+        background: rgba(0, 245, 212, 0.02);
         opacity: 0;
         pointer-events: none;
       }
@@ -1177,9 +1177,9 @@
           gsap.set("#static", { opacity: 0 });
           gsap.set("#crossLX", { scaleX: 0, opacity: 0 });
           gsap.set("#crossLY", { scaleY: 0, opacity: 0 });
-          gsap.set("#echo1", { z: -80, y: 26 });
-          gsap.set("#echo2", { z: -160, y: 56 });
-          gsap.set("#echo3", { z: -240, y: 86 });
+          gsap.set("#echo1", { z: -80, y: 40 });
+          gsap.set("#echo2", { z: -160, y: 84 });
+          gsap.set("#echo3", { z: -240, y: 128 });
           gsap.set("#trail", { scaleX: 0 });
           gsap.set("#reticle", { opacity: 0 });
           gsap.set("#badge", { opacity: 0, scale: 1.35, rotate: -4, y: 0 });
@@ -1355,9 +1355,9 @@
 
           /* scene 7 — the one 2.5D tilt */
           tl.to("#tilt", { rotateX: 26, y: 46, scale: 1.02, duration: 2.0, ease: "power2.inOut" }, 34.4);
-          tl.to("#echo1", { opacity: 0.4, duration: 0.4, ease: "power2.out" }, 34.5);
-          tl.to("#echo2", { opacity: 0.26, duration: 0.45, ease: "power2.out" }, 34.56);
-          tl.to("#echo3", { opacity: 0.15, duration: 0.5, ease: "power2.out" }, 34.62);
+          tl.to("#echo1", { opacity: 0.55, duration: 0.4, ease: "power2.out" }, 34.5);
+          tl.to("#echo2", { opacity: 0.38, duration: 0.45, ease: "power2.out" }, 34.56);
+          tl.to("#echo3", { opacity: 0.22, duration: 0.5, ease: "power2.out" }, 34.62);
           tl.to("#glowpool", { opacity: 1, duration: 1.8, ease: "power2.out" }, 34.5);
           tl.to("#neon", { opacity: 1, duration: 1.4, ease: "power2.inOut" }, 36.2);
 
