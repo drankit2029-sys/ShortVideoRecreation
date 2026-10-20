@@ -94,7 +94,11 @@ blum_s = np.asarray(_bl.filter(ImageFilter.GaussianBlur(2.0))).astype(np.float32
 # deep ocean reads near-black in the topo bathy imagery, so also take very
 # dark blue-marble pixels (otherwise the southern Indian Ocean is taken for
 # land and the asia fill paints a hard olive cap)
-ocean = (((tB - tR) > 0.04) & (tlum < 0.45)) | (blum < 0.14)
+ocean = (
+    (((tB - tR) > 0.04) & (tlum < 0.45))
+    | (blum < 0.14)
+    | (tB > tR * 1.04)  # blue-dominant pixels (catches bright tropical seas)
+)
 land = ~ocean
 _li = Image.fromarray((land * 255).astype(np.uint8), "L")
 _li = _li.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(3))
