@@ -1,0 +1,246 @@
+(0:00) Why every company is (0:02) giving up a 14 (0:03) day free trial these (0:04) days? (0:04) If they just wanted (0:05) to show their products, (0:06) then 3 or 7 (0:07) days would be enough. (0:08) But they don't just (0:09) want you to see (0:09) their products. (0:10) They want to create (0:11) a sense of ownership, (0:12) so that not buying (0:13) the product becomes painful.(0:15) It works like this. (0:16) In the first 1 (0:17) -3 days, you approach (0:18) the product with a (0:19) comparative mindset. (0:20) Is this product worth (0:21) buying or not? (0:22) There is no emotional (0:23) impact.(0:24) If the trial ends (0:25) here, you feel nothing. (0:26) You were just testing (0:27) it. (0:27) In the next few (0:28) days, you start working (0:29) seriously, import data from (0:30) other apps, start creating (0:31) web flows, and automate (0:33) tasks.(0:34) By the 10th or (0:34) 11th day, the product (0:36) becomes a habit. (0:37) The psychological reference point (0:38) shifts. (0:39) Now you are no (0:39) longer paying for a (0:40) new product (0:41) You are paying for (0:41) keeping what you feel (0:42) is yours. (0:44) And that’s why
+Here is a cinematic, director-style storyboard. It is built around **one central hero prop** (a sleek floating app card) that lives mostly in clean **2D vector space**, with just **one simple 2.5D perspective tilt** that any code model can render without breaking.
+
+Every shot follows the film rule: **one single action at a time**, matched with tactile sound effects (SFX) so it feels grounded, premium, and calm.
+
+---
+
+### Cinematic Color & Style Guide
+
+* **Canvas**: Deep Studio Charcoal (`#0D0E15`) — dark and filmic, not pitch black.
+* **Hero Accent**: Neon Electric Cyan (`#00F5D4`) — represents clarity, utility, and modern SaaS.
+* **Warm Contrast**: Vivid Amber (`#FFB703`) & Soft Coral (`#FF4D6D`) — represents investment and loss warning.
+* **Motion Feel**: High-inertia easing (`rate_func=smooth`), heavy damping (objects feel like they have physical weight), and zero visual jitter.
+
+---
+
+## The Cinematic Storyboard
+
+---
+
+### Scene 1: The Golden Number
+
+* **Timestamp**: `0:00 – 0:04`
+* **Voiceover**: *"Why every company is giving up a 14 day free trial these days?"*
+* **Primary Screen Action**: A crisp, rounded card flips horizontally like a shiny playing card and lands flat in the center of the frame.
+* **Visual Composition**:
+* **2D with 1 Easy 3D Flip**: A large, dark glass card (`RoundedRectangle`) rotates $180^\circ$ around the Y-axis (`axis=UP`) to face the viewer.
+* In the dead center of the card: The number **`14`** glows in vibrant Electric Cyan.
+
+
+* **Audio / SFX**:
+* `0:00` — Ambient vinyl room tone starts.
+* `0:02` — *Whoosh-thump* (deep, muted sub-bass card flip).
+* `0:03` — Clean mechanical *click* as the number 14 locks into focus.
+
+
+
+---
+
+### Scene 2: The Two False Stops
+
+* **Timestamp**: `0:04 – 0:08`
+* **Voiceover**: *"If they just wanted to show their products, then 3 or 7 days would be enough."*
+* **Primary Screen Action**: The card compresses into a sleek horizontal progress bar. A glowing slider dot glides across it, pausing momentarily at two tick marks before sailing past.
+* **Visual Composition** (Pure 2D):
+* The card shrinks into a thick timeline track.
+* Ticks appear at Day 3 and Day 7.
+* The cyan dot slides: stops at **3** *(pause)*, steps to **7** *(pause)*, then keeps sliding to **14**.
+* The space between 1 and 7 stays dim gray; the space between 7 and 14 lights up in warm Amber.
+
+
+* **Audio / SFX**:
+* `0:05` — Subtle metallic notch tap: *tik*.
+* `0:06` — Second notch tap: *tik*.
+* `0:07` — Gentle rising synth drone as the slider crosses past 7 toward 14.
+
+
+
+---
+
+### Scene 3: The Anchor Drops
+
+* **Timestamp**: `0:08 – 0:14`
+* **Voiceover**: *"But they don't just want you to see their products. They want to create a sense of ownership, so that not buying the product becomes painful."*
+* **Primary Screen Action**: The timeline re-expands into the full card. A glowing neon frame snaps tightly around its border, locking it into the screen.
+* **Visual Composition** (Pure 2D):
+* The card re-emerges at center.
+* A bold, luminous cyan border draws around it (`Create(outline)`).
+* When the outline completes, a subtle radial shockwave expands outward, dimming the rest of the canvas into pure focus.
+
+
+* **Audio / SFX**:
+* `0:09` — Smooth sliding swoosh as the card expands.
+* `0:11` — Heavy magnetic latch: *clack-hum*.
+* `0:13` — Low, ominous cello tone or sub-rumble on the word *"painful"*.
+
+
+
+---
+
+### Scene 4: Days 1–3 — The Window Shopper
+
+* **Timestamp**: `0:15 – 0:23`
+* **Voiceover**: *"It works like this. In the first 1-3 days, you approach the product with a comparative mindset. Is this product worth buying or not? There is no emotional impact."*
+* **Primary Screen Action**: A minimal cursor arrow glides in, taps once on the blank card, and glides away. Nothing sticks.
+* **Visual Composition** (Pure 2D):
+* The interior of the card is pristine, empty dark space with very faint wireframe gridlines.
+* A smooth white cursor enters from the left, clicks the center (producing a single ripple ring), and drifts out without leaving a trace.
+* The canvas remains completely untouched.
+
+
+* **Audio / SFX**:
+* `0:17` — Crisp, authentic mouse click: *click*.
+* `0:20` — Soft breeze or hollow glass tone (underscoring the feeling of "empty / no attachment").
+
+
+
+---
+
+### Scene 5: The Zero-Regret Exit
+
+* **Timestamp**: `0:24 – 0:27`
+* **Voiceover**: *"If the trial ends here, you feel nothing. You were just testing it."*
+* **Primary Screen Action**: The entire card simply slides off-screen to the left like a dismissed phone notification.
+* **Visual Composition** (Pure 2D):
+* The card accelerates smoothly off the left edge (`shift=LEFT * 12`).
+* The screen is empty for 1 full beat—calm, uncluttered, clean.
+
+
+* **Audio / SFX**:
+* `0:25` — Fast, frictionless swish: *swoosh* (like flicking a card off a table).
+* `0:26` — Complete silence for one second.
+
+
+
+---
+
+### Scene 6: Days 4–9 — Stacking the Sunk Cost
+
+* **Timestamp**: `0:27 – 0:34`
+* **Voiceover**: *"In the next few days, you start working seriously, import data from other apps, start creating web flows, and automate tasks."*
+* **Primary Screen Action**: The card slides back in. Exactly three colorful blocks snap into its layout one by one, filling the empty container.
+* **Visual Composition** (Pure 2D):
+* The card glides back to center.
+* **Beat 1 (0:29)**: A Cyan block labeled with a database icon snaps into place (`GrowFromCenter`).
+* **Beat 2 (0:31)**: An Amber block (connecting workflow lines) drops into place.
+* **Beat 3 (0:33)**: A Vivid Purple block (automation gear icon) slots into the bottom.
+* The previously empty card is now full, customized, and vibrant.
+
+
+* **Audio / SFX**:
+* `0:28` — Card returns: soft *thud*.
+* `0:29` — Tactile wooden/mechanical snap: *pop*.
+* `0:31` — Second mechanical snap: *clack*.
+* `0:33` — Heavy lock-in snap: *thunk*.
+
+
+
+---
+
+### Scene 7: Days 10–11 — The Perspective Shift (The 3D Moment)
+
+* **Timestamp**: `0:34 – 0:38`
+* **Voiceover**: *"By the 10th or 11th day, the product becomes a habit. The psychological reference point shifts."*
+* **Primary Screen Action**: The camera gently tilts down. The flat 2D card leans back into 2.5D perspective, looking like heavy furniture anchored to a desk.
+* **Visual Composition** (Easy Manim 3D):
+* The camera runs `self.move_camera(phi=40*DEGREES, run_time=3)`.
+* The card tilts back into isometric perspective.
+* A soft colored glow pools underneath it like an ambient shadow. It no longer looks like a temporary software screen; it looks like a physical home base.
+
+
+* **Audio / SFX**:
+* `0:35` — Deep, satisfying cinematic riser/swell.
+* `0:37` — A low harmonic bell ring on *"reference point shifts"*.
+
+
+
+---
+
+### Scene 8: Days 12–14 — The Payoff
+
+* **Timestamp**: `0:39 – 0:44`
+* **Voiceover**: *"Now you are no longer paying for a new product. You are paying for keeping what you feel is yours. And that’s why—"*
+* **Primary Screen Action**: An external red wireframe box threatens to cover the card, but a solid cyan "KEEP" button is pressed, instantly turning the whole frame calm and secure.
+* **Visual Composition** (2.5D into Flat Finish):
+* A red border vignette pulses briefly at the edges (the loss threat).
+* A bright pill button appears on the card: **`Keep My Workspace`**.
+* The cursor appears, clicks the button once.
+* The red threat vanishes immediately; the workspace blooms with steady, warm cyan light.
+* The frame slowly eases to dark as the voice says *"And that's why—"*.
+
+
+* **Audio / SFX**:
+* `0:40` — Dull, muffled friction buzz (danger of losing data).
+* `0:42` — Premium, crisp UI confirmation tone (like Apple Pay / chime: *ding*).
+* `0:43` — Reassuring bass exhale fading out into the cliffhanger.
+
+
+
+---
+
+## AI-Friendly Manim Code Blueprint
+
+This script is built for an AI or renderer to execute without 3D camera crashes or shader bugs:
+
+```python
+from manim import *
+
+class CinematicTrialExplainer(ThreeDScene):
+    def construct(self):
+        # 1. Base Setup
+        self.camera.background_color = "#0D0E15"
+        
+        # 2. Hero Card (Simple 2D Rounded Rectangle)
+        card = RoundedRectangle(
+            corner_radius=0.4, 
+            height=4.2, 
+            width=6.4, 
+            color="#00F5D4", 
+            fill_color="#131622", 
+            fill_opacity=0.9,
+            stroke_width=3
+        )
+        number_14 = Text("14", font="sans-serif", weight=BOLD, color="#FFFFFF").scale(2.2)
+        
+        # SCENE 1: Easy 3D Flip Entry (0:00 - 0:04)
+        hero_group = VGroup(card, number_14)
+        self.play(
+            FadeIn(hero_group, scale=0.8),
+            Rotate(hero_group, angle=PI, axis=UP),
+            run_time=2.2,
+            rate_func=smooth
+        )
+        self.wait(1.5)
+
+        # SCENE 2 & 3: Compress to timeline, then re-expand (0:04 - 0:14)
+        timeline = RoundedRectangle(corner_radius=0.15, height=0.3, width=6.4, color="#334155")
+        dot = Dot(color="#00F5D4", radius=0.18).move_to(timeline.get_left())
+        
+        self.play(ReplacementTransform(card, timeline), FadeOut(number_14), run_time=1.5)
+        self.play(dot.animate.move_to(timeline.get_right()), run_time=3.5, rate_func=smooth)
+        
+        # SCENE 6: Card returns and gets populated (0:27 - 0:34)
+        reconstructed_card = RoundedRectangle(corner_radius=0.4, height=4.2, width=6.4, color="#00F5D4")
+        b1 = RoundedRectangle(corner_radius=0.2, height=1.0, width=5.6, color="#00F5D4", fill_opacity=0.3).shift(UP * 1.1)
+        b2 = RoundedRectangle(corner_radius=0.2, height=1.0, width=5.6, color="#FFB703", fill_opacity=0.3)
+        b3 = RoundedRectangle(corner_radius=0.2, height=1.0, width=5.6, color="#7B2CBF", fill_opacity=0.3).shift(DOWN * 1.1)
+        
+        self.play(ReplacementTransform(timeline, reconstructed_card), FadeOut(dot), run_time=1.2)
+        self.play(GrowFromCenter(b1), run_time=0.8)
+        self.play(GrowFromCenter(b2), run_time=0.8)
+        self.play(GrowFromCenter(b3), run_time=0.8)
+
+        # SCENE 7: One Simple 2.5D Camera Tilt (0:34 - 0:38)
+        self.move_camera(phi=40 * DEGREES, run_time=3, rate_func=smooth)
+        self.wait(1)
+
+        # SCENE 8: The "Keep" Confirmation (0:39 - 0:44)
+        keep_btn = RoundedRectangle(corner_radius=0.2, height=0.6, width=2.4, color="#FFFFFF", fill_color="#00F5D4", fill_opacity=1).shift(DOWN * 1.1)
+        btn_text = Text("KEEP", font="sans-serif", weight=BOLD, color="#000000").scale(0.5).move_to(keep_btn)
+        
+        self.play(FadeIn(keep_btn), Write(btn_text), run_time=1.2)
+        self.play(keep_btn.animate.scale(1.1), run_time=0.3)
+        self.play(keep_btn.animate.scale(1/1.1), run_time=0.3)
+        self.wait(2)
+
