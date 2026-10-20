@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
           import json, math, sys
-          DUR, FPS, N = 27.633, 24, 15
+          DUR, FPS, N = 27.633, 24, 20
           frames = math.ceil(DUR * FPS)
           bounds = [min(frames, (i * frames) // N) for i in range(N + 1)]
           shards = [{"i": i, "f0": bounds[i], "f1": bounds[i + 1]}
@@ -35,7 +35,7 @@ jobs:
           print(f"# {len(shards)} shards, {frames} frames @ {FPS}fps", file=sys.stderr)
           EOF
 
-  # One runner per shard -> 15 parallel capture workers
+  # One runner per shard -> 20 parallel capture workers
   shard:
     needs: plan
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      max-parallel: 15
+      max-parallel: 20
       matrix:
         shard: ${{ fromJson(needs.plan.outputs.shards) }}
     steps:
