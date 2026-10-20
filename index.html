@@ -72,6 +72,63 @@
         will-change: transform;
       }
 
+      #cam {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        will-change: transform;
+      }
+      #deep {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        pointer-events: none;
+      }
+      #deep span { position: absolute; border-radius: 50%; }
+      #deep .orb3d { filter: blur(10px); }
+      #orbit {
+        position: absolute;
+        left: 540px;
+        top: 900px;
+        width: 1400px;
+        height: 1400px;
+        margin: -700px 0 0 -700px;
+        opacity: 0;
+        pointer-events: none;
+        transform-style: preserve-3d;
+      }
+      #orbitSpin {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+      }
+      #orbit .ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 245, 212, 0.3);
+        box-shadow:
+          0 0 44px rgba(0, 245, 212, 0.14),
+          inset 0 0 70px rgba(0, 245, 212, 0.06);
+      }
+      #orbit .orb {
+        position: absolute;
+        left: -7px;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        margin-top: -7px;
+        border-radius: 50%;
+        background: #00f5d4;
+        box-shadow: 0 0 20px 5px rgba(0, 245, 212, 0.55);
+      }
+      #orbit .orb.b {
+        left: auto;
+        right: -7px;
+        background: #ffb703;
+        box-shadow: 0 0 20px 5px rgba(255, 183, 3, 0.5);
+      }
+
       #glowpool {
         position: absolute;
         left: 50%;
@@ -567,28 +624,74 @@
         background: linear-gradient(180deg, #7d8598 0%, #a9b0bd 100%);
         mix-blend-mode: saturation;
       }
-      #blackout {
-        position: absolute;
-        inset: 0;
-        z-index: 45;
-        background: #04050a;
-        opacity: 0;
-        pointer-events: none;
-      }
       #powerline {
         position: absolute;
         left: 0;
         right: 0;
         top: 958px;
-        height: 4px;
+        height: 3px;
         z-index: 46;
         opacity: 0;
         pointer-events: none;
-        background: #eafffb;
+        background: rgba(234, 255, 251, 0.9);
         box-shadow:
-          0 0 26px 8px rgba(0, 245, 212, 0.8),
-          0 0 90px 22px rgba(0, 245, 212, 0.35);
+          0 0 20px 6px rgba(0, 245, 212, 0.55),
+          0 0 70px 18px rgba(0, 245, 212, 0.22);
       }
+      #fx,
+      #streaks { position: absolute; inset: 0; pointer-events: none; }
+      #fx { z-index: 23; }
+      #fx span {
+        position: absolute;
+        border-radius: 3px;
+        mix-blend-mode: screen;
+        will-change: transform, opacity;
+      }
+      #fx .rocket {
+        position: absolute;
+        top: 0;
+        width: 4px;
+        height: 120px;
+        border-radius: 2px;
+        mix-blend-mode: screen;
+        background: linear-gradient(
+          180deg,
+          #ffffff 0%,
+          rgba(0, 245, 212, 0.85) 18%,
+          rgba(0, 245, 212, 0.18) 62%,
+          rgba(0, 245, 212, 0) 100%
+        );
+        box-shadow: 0 0 16px rgba(0, 245, 212, 0.7);
+      }
+      #streaks { z-index: 21; }
+      #streaks span {
+        position: absolute;
+        height: 2px;
+        border-radius: 1px;
+        mix-blend-mode: screen;
+        background: linear-gradient(
+          90deg,
+          rgba(234, 255, 251, 0) 0%,
+          rgba(234, 255, 251, 0.8) 50%,
+          rgba(0, 245, 212, 0) 100%
+        );
+      }
+      #cursorTrail {
+        position: absolute;
+        inset: 0;
+        z-index: 19;
+        pointer-events: none;
+      }
+      .cghost {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 54px;
+        height: 54px;
+        opacity: 0;
+        filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.8));
+      }
+      .cghost svg { width: 54px; height: 54px; }
       #converge,
       #sparks { position: absolute; inset: 0; pointer-events: none; }
       #converge { z-index: 12; }
@@ -763,16 +866,6 @@
           rgba(0, 0, 0, 0) 1px 4px
         );
       }
-      #static {
-        position: absolute;
-        inset: -100px;
-        z-index: 35;
-        opacity: 0;
-        mix-blend-mode: screen;
-        pointer-events: none;
-        background-repeat: repeat;
-        background-size: 160px 160px;
-      }
       #crossLX {
         position: absolute;
         left: 54px;
@@ -847,11 +940,21 @@
       <div id="dust"></div>
 
       <div id="space">
-        <div id="tilt">
-          <div id="float">
-            <div id="glowpool"></div>
+        <div id="cam">
+          <div data-layout-allow-occlusion id="deep"></div>
+          <div id="tilt">
+            <div id="float">
+              <div id="glowpool"></div>
 
-            <div data-layout-allow-occlusion id="echo3"></div>
+              <div data-layout-allow-occlusion id="orbit">
+                <div id="orbitSpin">
+                  <div class="ring"></div>
+                  <span class="orb"></span>
+                  <span class="orb b"></span>
+                </div>
+              </div>
+
+              <div data-layout-allow-occlusion id="echo3"></div>
             <div data-layout-allow-occlusion id="echo2"></div>
             <div data-layout-allow-occlusion id="echo1"></div>
 
@@ -946,6 +1049,7 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       <div data-layout-allow-occlusion id="converge"></div>
@@ -958,6 +1062,7 @@
             fill="#f4f7f6" stroke="#0d0e15" stroke-width="2.4" stroke-linejoin="round" />
         </svg>
       </div>
+      <div data-layout-allow-occlusion id="cursorTrail"></div>
 
       <div data-layout-allow-occlusion id="focusDim"></div>
       <div data-layout-allow-occlusion id="neutralWash"></div>
@@ -966,13 +1071,13 @@
       <div data-layout-allow-occlusion id="threatRingB"></div>
       <div data-layout-allow-occlusion id="ctaRing"></div>
       <div data-layout-allow-occlusion id="sparks"></div>
+      <div data-layout-allow-occlusion id="streaks"></div>
+      <div data-layout-allow-occlusion id="fx"></div>
       <div data-layout-allow-occlusion id="bloom"></div>
-      <div data-layout-allow-occlusion id="blackout"></div>
       <div data-layout-allow-occlusion id="powerline"></div>
       <div data-layout-allow-occlusion id="capBand"></div>
       <div data-layout-allow-occlusion id="vignette"></div>
       <div data-layout-allow-occlusion id="grain"></div>
-      <div data-layout-allow-occlusion id="static"></div>
       <div data-layout-allow-occlusion id="crt"></div>
       <div data-layout-allow-occlusion id="crossLX"></div>
       <div data-layout-allow-occlusion id="crossLY"></div>
@@ -1092,6 +1197,49 @@
           convSpans.forEach(function (cs) { gsap.set(cs, { opacity: 0 }); });
           sparkSpans.forEach(function (sk) { gsap.set(sk, { opacity: 0 }); });
 
+          /* deep 3D starfield + orbit rig */
+          var deepWrap = $("#deep");
+          for (var di = 0; di < 26; di++) {
+            var ds = document.createElement("span");
+            var dsz = 3 + rnd() * 7;
+            ds.style.left = (rnd() * 1080).toFixed(0) + "px";
+            ds.style.top = (200 + rnd() * 1500).toFixed(0) + "px";
+            ds.style.width = dsz.toFixed(1) + "px";
+            ds.style.height = dsz.toFixed(1) + "px";
+            ds.style.background = rnd() > 0.72 ? "#ffb703" : "#00f5d4";
+            ds.style.boxShadow = "0 0 10px rgba(0,245,212,0.55)";
+            deepWrap.appendChild(ds);
+            gsap.set(ds, {
+              z: -160 - rnd() * 480,
+              opacity: 0.12 + rnd() * 0.3
+            });
+          }
+          for (var oi = 0; oi < 4; oi++) {
+            var orb = document.createElement("span");
+            orb.className = "orb3d";
+            var osz = 220 + rnd() * 260;
+            orb.style.left = (rnd() * 900 - 60).toFixed(0) + "px";
+            orb.style.top = (200 + rnd() * 1100).toFixed(0) + "px";
+            orb.style.width = orb.style.height = osz.toFixed(0) + "px";
+            orb.style.background = oi % 2 ? "rgba(157,78,221,0.16)" : "rgba(0,245,212,0.13)";
+            deepWrap.appendChild(orb);
+            gsap.set(orb, { z: -260 - rnd() * 320, opacity: 0.42 });
+          }
+          gsap.set("#orbitSpin", { rotateX: 76 });
+          gsap.set("#orbit", { z: -520 });
+
+          /* comet cursor ghosts */
+          var ghostSVG = '<svg viewBox="0 0 48 48"><path d="M4 3 L4 39 L13 30.5 L19 44 L26 41 L20 27.5 L33 27.5 Z" fill="#00f5d4" stroke="#0d0e15" stroke-width="2.4" stroke-linejoin="round" /></svg>';
+          var ghosts = [];
+          var ghostO = [0.34, 0.24, 0.16, 0.1];
+          for (var gi = 0; gi < 4; gi++) {
+            var gh = document.createElement("div");
+            gh.className = "cghost";
+            gh.innerHTML = ghostSVG;
+            $("#cursorTrail").appendChild(gh);
+            ghosts.push(gh);
+          }
+
           var nc = document.createElement("canvas");
           nc.width = nc.height = 160;
           var ng = nc.getContext("2d");
@@ -1103,7 +1251,6 @@
           }
           ng.putImageData(nimg, 0, 0);
           $("#grain").style.backgroundImage = "url(" + nc.toDataURL("image/png") + ")";
-          $("#static").style.backgroundImage = "url(" + nc.toDataURL("image/png") + ")";
 
           /* -------------------------------------------------- captions */
           var PHRASES = [
@@ -1174,7 +1321,6 @@
           gsap.set("#neonCyan", { opacity: 0 });
           gsap.set("#hud", { opacity: 0 });
           gsap.set("#scanSweep", { opacity: 0 });
-          gsap.set("#static", { opacity: 0 });
           gsap.set("#crossLX", { scaleX: 0, opacity: 0 });
           gsap.set("#crossLY", { scaleY: 0, opacity: 0 });
           gsap.set("#echo1", { z: -80, y: 40 });
@@ -1188,9 +1334,154 @@
           gsap.set("#threatRingB", { scale: 0.35, opacity: 0 });
           gsap.set("#ctaRing", { scale: 0.35, opacity: 0 });
           gsap.set("#neutralWash", { opacity: 0 });
-          gsap.set("#blackout", { opacity: 0 });
           gsap.set("#threatScan", { opacity: 0 });
           gsap.set("#blockSweep", { opacity: 0 });
+          gsap.set("#cam", { x: 0, y: 0 });
+
+          /* ------------------------------------------- 3D camera choreography */
+          tl.fromTo("#cam", { z: -180, rotateY: 12, rotateX: -5 },
+            { z: 0, rotateY: 0, rotateX: 0, duration: 2.05, ease: "power3.out", immediateRender: false }, 0.16);
+          tl.to("#cam", { rotateX: 12, rotateY: -7, z: 40, duration: 1.05, ease: "power2.inOut" }, 4.55);
+          tl.to("#cam", { rotateY: 7, z: 52, duration: 0.9, ease: "sine.inOut" }, 5.6);
+          tl.to("#cam", { rotateX: 0, rotateY: 0, z: 0, duration: 1.35, ease: "power2.inOut" }, 6.5);
+          tl.to("#cam", { z: 70, rotateZ: -1.4, duration: 0.65, ease: "power2.in" }, 10.4);
+          tl.to("#cam", { z: 0, rotateZ: 0, duration: 0.85, ease: "elastic.out(1,0.55)" }, 11.05);
+          tl.to("#cam", { rotateY: -10, rotateX: 4, z: 70, duration: 2.9, ease: "sine.inOut" }, 14.7);
+          tl.to("#cam", { rotateY: 6, duration: 3.6, ease: "sine.inOut" }, 17.6);
+          tl.to("#cam", { rotateY: -2, duration: 1.7, ease: "sine.inOut" }, 21.2);
+          tl.to("#cam", { rotateY: 0, rotateX: 0, z: 0, duration: 0.4, ease: "power2.inOut" }, 22.9);
+          tl.to("#cam", { rotateY: -8, z: 50, duration: 0.8, ease: "power2.in" }, 23.4);
+          tl.to("#cam", { rotateY: 0, z: 0, duration: 0.6, ease: "power3.out" }, 26.9);
+          tl.to("#cam", { z: 90, rotateY: -6, duration: 1.2, ease: "power2.inOut" }, 28.8);
+          tl.to("#cam", { z: 0, rotateY: 0, duration: 0.6, ease: "power2.inOut" }, 33.4);
+          tl.to("#cam", { rotateY: 6, z: 40, duration: 3.0, ease: "sine.inOut" }, 34.4);
+          tl.to("#cam", { rotateY: 0, z: 0, duration: 1.2, ease: "power2.inOut" }, 37.4);
+          tl.to("#cam", { x: 9, y: -7, duration: 0.055, ease: "none" }, 38.85);
+          tl.to("#cam", { x: -11, y: 6, duration: 0.055, ease: "none" }, 38.905);
+          tl.to("#cam", { x: 8, y: 5, duration: 0.055, ease: "none" }, 38.96);
+          tl.to("#cam", { x: -7, y: -4, duration: 0.055, ease: "none" }, 39.015);
+          tl.to("#cam", { x: 4, y: 2, duration: 0.055, ease: "none" }, 39.07);
+          tl.to("#cam", { x: 0, y: 0, duration: 0.055, ease: "none" }, 39.125);
+          tl.to("#cam", { z: 110, duration: 0.32, ease: "power3.out" }, 42.0);
+          tl.to("#cam", { z: 30, duration: 0.45, ease: "power2.inOut" }, 42.32);
+          tl.to("#cam", { rotateY: 3, z: 0, duration: 2.5, ease: "sine.inOut" }, 42.8);
+
+          /* starfield drift + orbit rotation */
+          var deepStars = deepWrap.querySelectorAll("span");
+          for (var dj = 0; dj < deepStars.length; dj++) {
+            tl.to(deepStars[dj], {
+              z: "+=90",
+              x: (rnd() - 0.5) * 44,
+              y: (rnd() - 0.5) * 70,
+              duration: 9 + rnd() * 6,
+              yoyo: true,
+              repeat: 4,
+              ease: "sine.inOut"
+            }, 0.5 + rnd() * 5);
+          }
+          tl.to("#orbit", { opacity: 0.85, duration: 1.0, ease: "power2.out" }, 34.7);
+          tl.fromTo("#orbitSpin", { rotateZ: 0 },
+            { rotateZ: 360, duration: 9.4, ease: "none", immediateRender: false }, 34.8);
+          tl.to("#orbit", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 44.25);
+
+          /* ------------------------------------------------- fireworks rig */
+          var fxWrap = $("#fx");
+          function burst(t, cx, cy, colors, n, power, grav) {
+            for (var k = 0; k < n; k++) {
+              var p = document.createElement("span");
+              var ang = (k / n) * Math.PI * 2 + rnd() * 0.28;
+              var sp = power * (0.55 + rnd() * 0.7);
+              p.style.width = (8 + rnd() * 16).toFixed(1) + "px";
+              p.style.height = (2 + rnd() * 4).toFixed(1) + "px";
+              p.style.left = "0";
+              p.style.top = "0";
+              p.style.background = colors[k % colors.length];
+              p.style.boxShadow = "0 0 12px rgba(255,255,255,0.45)";
+              fxWrap.appendChild(p);
+              gsap.set(p, { x: cx, y: cy, rotation: ang * 180 / Math.PI, opacity: 0, scale: 1 });
+              tl.to(p, {
+                x: cx + Math.cos(ang) * sp * 0.55,
+                y: cy + Math.sin(ang) * sp * 0.55 - 10,
+                opacity: 1, duration: 0.12, ease: "power2.out"
+              }, t);
+              tl.to(p, {
+                x: cx + Math.cos(ang) * sp * 1.35,
+                y: cy + Math.sin(ang) * sp * 1.35 + grav,
+                opacity: 0, scale: 0.55, duration: 0.85 + rnd() * 0.4, ease: "power2.out"
+              }, t + 0.12);
+            }
+          }
+          function rocket(t0, cx, y0, y1, colors, n, power) {
+            var rEl = document.createElement("span");
+            rEl.className = "rocket";
+            rEl.style.left = "0";
+            fxWrap.appendChild(rEl);
+            gsap.set(rEl, { x: cx, y: y0, opacity: 0 });
+            tl.to(rEl, { y: y1, opacity: 0.9, duration: 0.42, ease: "power1.in" }, t0);
+            tl.to(rEl, { opacity: 0, duration: 0.06, ease: "none" }, t0 + 0.42);
+            burst(t0 + 0.42, cx, y1, colors, n, power, 180);
+          }
+          var pal = ["#00f5d4", "#ffb703", "#ff4d6d", "#f4f7f6", "#9d4edd"];
+          burst(11.18, 540, 900, ["#00f5d4", "#ffb703", "#f4f7f6"], 14, 150, 60);
+          burst(34.55, 540, 900, ["#00f5d4", "#f4f7f6"], 10, 110, 50);
+          burst(41.86, 540, 1122, pal, 34, 280, 240);
+          rocket(42.35, 300, 1500, 700, pal, 24, 230);
+          rocket(42.75, 800, 1500, 620, pal, 24, 230);
+          rocket(43.15, 540, 1500, 520, pal, 26, 240);
+
+          /* -------------------------------------------------- speed streaks */
+          var streaksWrap = $("#streaks");
+          function streakBatch(t, mode) {
+            for (var k = 0; k < 9; k++) {
+              var s = document.createElement("span");
+              s.style.left = "0";
+              s.style.top = "0";
+              streaksWrap.appendChild(s);
+              if (mode === "vert") {
+                s.style.width = "2px";
+                s.style.height = (120 + rnd() * 260).toFixed(0) + "px";
+                s.style.background = "linear-gradient(180deg, rgba(234,255,251,0), rgba(234,255,251,0.8), rgba(0,245,212,0))";
+                var vx = 80 + rnd() * 920;
+                gsap.set(s, { x: vx, y: -300, opacity: 0 });
+                tl.to(s, { y: 1700, opacity: 0.6, duration: 0.5, ease: "power2.in" }, t + k * 0.035);
+                tl.to(s, { opacity: 0, duration: 0.12, ease: "none" }, t + k * 0.035 + 0.5);
+              } else {
+                s.style.width = (220 + rnd() * 420).toFixed(0) + "px";
+                var dir = mode === "left" ? -1 : 1;
+                var sx = dir < 0 ? 1200 : -400;
+                var ex = dir < 0 ? -700 : 1500;
+                var yy = 520 + rnd() * 900;
+                gsap.set(s, { x: sx, y: yy, opacity: 0 });
+                tl.to(s, { x: ex, opacity: 0.5, duration: 0.42, ease: "power2.in" }, t + k * 0.025);
+                tl.to(s, { opacity: 0, duration: 0.1, ease: "none" }, t + k * 0.025 + 0.42);
+              }
+            }
+          }
+          streakBatch(0.4, "vert");
+          streakBatch(23.3, "left");
+          streakBatch(27.08, "right");
+
+          /* --------------------------------------------- cursor comet trail */
+          function ghostRun(t0, path) {
+            var total = 0;
+            for (var k = 1; k < path.length; k++) total += path[k][2];
+            ghosts.forEach(function (g, i) {
+              var d = i * 0.055;
+              tl.set(g, { x: path[0][0], y: path[0][1], opacity: ghostO[i] }, t0 + d);
+              var kf = [];
+              for (var k2 = 1; k2 < path.length; k2++) {
+                kf.push({
+                  x: path[k2][0], y: path[k2][1],
+                  duration: path[k2][2], ease: path[k2][3]
+                });
+              }
+              tl.to(g, { keyframes: kf }, t0 + d);
+              tl.to(g, { opacity: 0, duration: 0.35, ease: "none" }, t0 + d + total + 0.5);
+            });
+          }
+          ghostRun(15.05, [[170, 1070], [404, 962, 1.0, "sine.inOut"], [540, 900, 0.85, "power2.inOut"], [766, 1182, 1.15, "power2.inOut"]]);
+          ghostRun(40.05, [[862, 1312], [640, 1200, 0.85, "sine.inOut"], [540, 1122, 0.75, "power2.inOut"]]);
+
 
           /* scene 1 — flip in, 14 locks */
           tl.to("#ambient", { opacity: 1, duration: 2.2, ease: "power2.out" }, 0.05);
@@ -1316,15 +1607,11 @@
           tl.set("#float", { x: -1250, rotate: 0, opacity: 1 }, 27.05);
           tl.to("#float", { x: 0, duration: 0.82, ease: "power4.out" }, 27.1);
           tl.to("#gridlines", { opacity: 0.35, duration: 0.8, ease: "power2.out" }, 27.4);
-          tl.to("#blackout", { opacity: 0.55, duration: 0.09, ease: "none" }, 23.3);
-          tl.to("#blackout", { opacity: 0, duration: 0.34, ease: "power2.out" }, 23.42);
-          tl.fromTo("#powerline", { scaleX: 1, opacity: 1 },
-            { scaleX: 0, opacity: 0.25, duration: 0.3, ease: "power2.in", immediateRender: false }, 23.33);
+          tl.fromTo("#powerline", { scaleX: 0.2, opacity: 0.5 },
+            { scaleX: 1, opacity: 0.18, duration: 0.3, ease: "power2.in", immediateRender: false }, 23.33);
           tl.to("#powerline", { opacity: 0, duration: 0.1, ease: "none" }, 23.64);
-          tl.to("#blackout", { opacity: 0.4, duration: 0.07, ease: "none" }, 27.0);
-          tl.to("#blackout", { opacity: 0, duration: 0.3, ease: "power2.out" }, 27.1);
           tl.fromTo("#powerline", { scaleX: 0, opacity: 0 },
-            { scaleX: 1, opacity: 0.9, duration: 0.2, ease: "power2.out", immediateRender: false }, 27.06);
+            { scaleX: 1, opacity: 0.55, duration: 0.2, ease: "power2.out", immediateRender: false }, 27.06);
           tl.to("#powerline", { opacity: 0, duration: 0.22, ease: "power2.in" }, 27.28);
           tl.to("#card", { filter: "brightness(1.45)", duration: 0.08, ease: "none" }, 27.06);
           tl.to("#card", { filter: "brightness(1)", duration: 0.4, ease: "power2.out" }, 27.15);
@@ -1444,23 +1731,15 @@
             tl.fromTo("#card", { x: -8 * s, clipPath: "inset(0% 0 0% 0)" },
               { x: 7 * s, clipPath: "inset(12% 0 63% 0)", duration: f, ease: "steps(1)", immediateRender: false }, t);
             tl.fromTo("#neon", { x: -5 * s }, { x: 5 * s, duration: f, ease: "steps(1)", immediateRender: false }, t);
-            tl.to("#static", { opacity: 0.12 + 0.09 * s, duration: f, ease: "steps(1)" }, t);
             tl.to("#neonRed", { opacity: 0.55, x: 10 * s, duration: f, ease: "steps(1)" }, t);
             tl.to("#neonCyan", { opacity: 0.55, x: -10 * s, duration: f, ease: "steps(1)" }, t);
             tl.to("#card", { x: -3 * s, clipPath: "inset(56% 0 16% 0)", duration: f, ease: "steps(1)" }, t + f);
             tl.to("#card", { x: 0, clipPath: "inset(0% 0 0% 0)", duration: f, ease: "steps(1)" }, t + 2 * f);
             tl.to("#neon", { x: 0, duration: f, ease: "steps(1)" }, t + 2 * f);
-            tl.to("#static", { opacity: 0, duration: 0.1 }, t + 2 * f);
             tl.to(["#neonRed", "#neonCyan"], { opacity: 0, x: 0, duration: 0.1 }, t + 2 * f);
             tl.set("#card", { clipPath: "none", x: 0 }, t + 3 * f);
           }
-          cardGlitch(4.29, 0.7);
-          cardGlitch(8.34, 0.7);
           cardGlitch(11.12, 1.15);
-          cardGlitch(17.0, 1.0);
-          cardGlitch(23.36, 0.65);
-          cardGlitch(27.1, 0.95);
-          cardGlitch(39.55, 0.6);
           cardGlitch(41.82, 1.3);
 
 
