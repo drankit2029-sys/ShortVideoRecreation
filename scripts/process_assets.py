@@ -273,7 +273,7 @@ aedge[:, :-1] |= asia[:, :-1] != asia[:, 1:]
 asia_rgba = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a[..., 0], fill_a[..., 1], fill_a[..., 2] = 255, 201, 60
-fill_a[..., 3] = asia.astype(np.float32) * 36
+fill_a[..., 3] = asia.astype(np.float32) * 24
 glow = np.asarray(glow_stack(aedge, core="#FFD24A", mid="#FFB300", outer="#FF9500")).astype(np.float32)
 asia_rgba = np.maximum(fill_a, glow)
 # feather the crop borders so the rectangle cut never shows a hard edge

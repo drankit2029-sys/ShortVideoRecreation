@@ -1168,7 +1168,7 @@
         asiaShell.visible = asiaOn;
         if (asiaOn) {
           setReveal(asiaShell.material, asiaUv.cu, asiaUv.cv, revealK(t, 22.95, 23.35, 3.6));
-          asiaShell.material.opacity = win(t, 22.9, 23.12) * (1 - win(t, 25.25, 25.42));
+          asiaShell.material.opacity = 0.7 * win(t, 22.9, 23.12) * (1 - win(t, 25.25, 25.42));
         }
 
         /* flags */
