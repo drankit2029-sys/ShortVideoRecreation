@@ -97,7 +97,6 @@ blum_s = np.asarray(_bl.filter(ImageFilter.GaussianBlur(2.0))).astype(np.float32
 ocean = (
     (((tB - tR) > 0.04) & (tlum < 0.45))
     | (blum < 0.14)
-    | (tB > tR * 1.04)  # blue-dominant pixels (catches bright tropical seas)
 )
 land = ~ocean
 _li = Image.fromarray((land * 255).astype(np.uint8), "L")
