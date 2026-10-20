@@ -7,6 +7,7 @@ on:
     paths:
       - "index.html"
       - "assets/**"
+      - "scripts/make_shard.py"
       - ".github/workflows/3-render.yml"
 
 concurrency:
@@ -14,12 +15,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  render:
+  # Frame-aligned shard plan: N parallel runners, ceil(duration*fps) frames
+  # split into [f0, f1) ranges rendered against generated shard compositions.
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    outputs:
+      shards: ${{ steps.calc.outputs.shards }}
+    steps:
+      - id: calc
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, math, sys
+          DUR, FPS, N = 27.633, 24, 15
+          frames = math.ceil(DUR * FPS)
+          bounds = [min(frames, (i * frames) // N) for i in range(N + 1)]
+          shards = [{"i": i, "f0": bounds[i], "f1": bounds[i + 1]}
+                    for i in range(N) if bounds[i + 1] > bounds[i]]
+          print("shards=" + json.dumps(shards))
+          print(f"# {len(shards)} shards, {frames} frames @ {FPS}fps", file=sys.stderr)
+          EOF
+
+  # One runner per shard -> 15 parallel capture workers
+  shard:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
-      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 15
+      matrix:
+        shard: ${{ fromJson(needs.plan.outputs.shards) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,11 +54,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install system deps (chrome + ffmpeg)
+      - name: Install system deps (chrome)
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            ffmpeg \
             libnss3 libnspr4 libatk1.0-0t64 libatk-bridge2.0-0t64 \
             libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 \
             libxdamage1 libxfixes3 libxrandr2 libgbm1 \
@@ -44,13 +70,59 @@ jobs:
       - name: Ensure browser
         run: npx hyperframes@0.8.171 browser ensure
 
-      - name: Fetch processed assets
+      - name: Verify assets
+        run: test -f assets/processed/earth-graded.jpg || { echo "missing processed assets" >&2; exit 1; }
+
+      - name: Generate shard composition
         run: |
-          # assets were built by workflow 2; fall back to committed copies
-          if [ ! -f assets/processed/earth-graded.jpg ]; then
-            echo "ERROR: processed assets missing" >&2; exit 1
-          fi
-          ls -la assets/processed assets/processed/audio assets/fonts assets/vendor
+          mkdir -p _shards
+          python3 scripts/make_shard.py index.html \
+            "_shards/shard-${{ matrix.shard.i }}.html" \
+            "${{ matrix.shard.f0 }}" "${{ matrix.shard.f1 }}"
+
+      - name: Render shard
+        run: |
+          npx hyperframes@0.8.171 render \
+            -c "_shards/shard-${{ matrix.shard.i }}.html" \
+            -f 24 --quality looks \
+            -o "shard-${{ matrix.shard.i }}.mp4"
+
+      - name: Upload shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: shard-${{ matrix.shard.i }}
+          path: shard-${{ matrix.shard.i }}.mp4
+          if-no-files-found: error
+          retention-days: 1
+
+  # Runs parallel with the shard fleet: lint + static QA + beat snapshots
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install system deps (chrome)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libnss3 libnspr4 libatk1.0-0t64 libatk-bridge2.0-0t64 \
+            libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 \
+            libxdamage1 libxfixes3 libxrandr2 libgbm1 \
+            libpango-1.0-0 libcairo2 libasound2t64 fonts-liberation \
+            fonts-noto-color-emoji
+
+      - name: Install JS deps
+        run: npm install --no-audit --no-fund --save-dev hyperframes@0.8.171
+
+      - name: Ensure browser
+        run: npx hyperframes@0.8.171 browser ensure
 
       - name: Validate composition
         run: |
@@ -66,20 +138,62 @@ jobs:
             -o .hyperframes/artifacts/snapshots \
             --timeout 20000
 
-      - name: Render video
+      - name: Upload QA snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-snapshots
+          path: .hyperframes/artifacts/snapshots/
+          if-no-files-found: warn
+
+  # Concat all shards, mux the voiceover, score, ship
+  assemble:
+    needs: [plan, shard]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
         run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Download shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: shard-*
+          merge-multiple: true
+          path: shards
+
+      - name: Concat + mux
+        run: |
+          python3 - <<'EOF' > concat.txt
+          import glob, os, re
+          files = sorted(glob.glob("shards/shard-*.mp4"),
+                         key=lambda p: int(re.search(r"shard-(\d+)", p).group(1)))
+          assert files, "no shards"
+          for f in files:
+              print(f"file '{os.path.abspath(f)}'")
+          print(f"# {len(files)} shards", file=__import__('sys').stderr)
+          EOF
+          ffmpeg -y -f concat -safe 0 -i concat.txt -c copy assembled.mp4
           mkdir -p Output
-          npx hyperframes@0.8.171 render --quality looks --fps 60 --output Output/recreation.mp4
+          ffmpeg -y -i assembled.mp4 -i assets/processed/audio/track.m4a \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -t 27.633 \
+            Output/recreation.mp4
+          ffprobe -v error -show_entries format=duration \
+            -of csv=p=0 Output/recreation.mp4
 
       - name: Compare against reference
         run: |
           mkdir -p comparison
-          # sample 24 evenly spaced frames from both, compute per-frame SSIM
           ffmpeg -y -i Output/recreation.mp4 -i reference/target.mp4 \
             -lavfi "[0:v]fps=2,scale=540:960[a];[1:v]fps=2,scale=540:960[b];[a][b]ssim=stats_file=comparison/ssim.log" \
             -f null - 2> comparison/ssim-summary.txt || true
           grep -o "All:[0-9.]*" comparison/ssim-summary.txt | tail -1 | tee comparison/ssim-mean.txt
-          # side-by-side sheets at scene beats
           for t in 0.6 2.0 3.6 6.8 8.6 13.0 15.5 17.6 19.5 21.5 23.4 26.5; do
             ffmpeg -y -ss $t -i Output/recreation.mp4 -frames:v 1 -q:v 2 comparison/r_$t.jpg
             ffmpeg -y -ss $t -i reference/target.mp4 -frames:v 1 -q:v 2 comparison/ref_$t.jpg
@@ -97,11 +211,9 @@ jobs:
           path: Output/recreation.mp4
           if-no-files-found: error
 
-      - name: Upload QA artifacts
+      - name: Upload comparison
         uses: actions/upload-artifact@v4
         with:
           name: render-qa
-          path: |
-            comparison/
-            .hyperframes/artifacts/snapshots/
+          path: comparison/
           if-no-files-found: warn

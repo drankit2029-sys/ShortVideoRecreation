@@ -279,7 +279,8 @@
       data-width="1080"
       data-height="1920"
       data-duration="27.633"
-      data-fps="60"
+      data-fps="24"
+      data-composition-variables='[{"id":"hfShardStart","type":"number","label":"Shard start","default":-1},{"id":"hfShardEnd","type":"number","label":"Shard end","default":-1}]'
     >
       <div id="bgGrid"></div>
 
@@ -331,6 +332,69 @@
       data-start="0"
       data-duration="27.633"
     ></audio>
+
+    <script>
+      /* ---- parallel shard capture ------------------------------------------
+         The render workflow renders the composition in N segments, each on its
+         own runner, via --variables {"hfShardStart":s,"hfShardEnd":e}.
+         In shard mode we shrink the root data-duration to (e - s), retime every
+         data-start window into shard-local time, drop the audio (assembled
+         once at the end), and the seek handler maps u -> s + u.
+         Runs at parse time and again at boot in case the renderer injects the
+         variables late; guarded so it only ever applies once.               */
+      window.__hfShardSetup = function () {
+        if (window.__HF_SHARD_APPLIED) return window.__HF_SHARD;
+        var vs = {};
+        try {
+          vs =
+            (window.__hyperframes &&
+              window.__hyperframes.getVariables &&
+              window.__hyperframes.getVariables()) ||
+            window.__hfVariables ||
+            {};
+        } catch (e) {}
+        var q = new URLSearchParams(location.search);
+        function num(k) {
+          if (vs[k] !== undefined && vs[k] !== null && vs[k] !== "") return Number(vs[k]);
+          if (q.has(k)) return Number(q.get(k));
+          return NaN;
+        }
+        var S = num("hfShardStart");
+        var E = num("hfShardEnd");
+        var shard = isFinite(S) && isFinite(E) && E > S ? { s: S, e: E } : null;
+        window.__HF_SHARD = shard;
+        if (!shard) return null;
+        window.__HF_SHARD_APPLIED = true;
+        var vo = document.getElementById("vo");
+        if (vo) vo.remove();
+        /* retime every data-start window (including #root) into shard-local
+           time — root: [0, E-S]; clips: intersected with [S, E]            */
+        document.querySelectorAll("[data-start]").forEach(function (el) {
+          var ds = parseFloat(el.getAttribute("data-start"));
+          var dd = parseFloat(el.getAttribute("data-duration") || "0");
+          if (!isFinite(ds)) return;
+          var gs = ds,
+            ge = ds + dd;
+          var ns = Math.max(gs, shard.s);
+          var ne = Math.min(ge, shard.e);
+          if (ne <= ns) {
+            el.parentNode && el.parentNode.removeChild(el);
+          } else {
+            el.setAttribute("data-start", String(ns - shard.s));
+            el.setAttribute("data-duration", String(ne - ns));
+          }
+        });
+        var root = document.querySelector("[data-composition-id]");
+        if (root && !root.getAttribute("data-duration")) {
+          root.setAttribute("data-duration", String(E - S));
+        }
+        return shard;
+      };
+      window.__hfShardSetup();
+      document.addEventListener("DOMContentLoaded", function () {
+        window.__hfShardSetup();
+      });
+    </script>
 
     <script type="module">
       import * as THREE from "three";
@@ -645,15 +709,15 @@
 
         /* US flag-map cutouts */
         const flagAnchors = [
-          [5, 55],
-          [6, 78],
-          [-1, 50],
-          [0, 80],
-          [-7, 45],
-          [-6, 74],
-          [-6, 98],
+          [11, 56],
+          [11, 77],
+          [2, 54],
+          [2, 75],
+          [-7, 50],
+          [-7, 70],
+          [-7, 90],
         ];
-        const flagGeo = new THREE.PlaneGeometry(0.4, (0.4 * 466) / 984);
+        const flagGeo = new THREE.PlaneGeometry(0.45, (0.45 * 466) / 984);
         for (const [lat, lng] of flagAnchors) {
           const mat = new THREE.MeshBasicMaterial({
             map: BASE.flag,
@@ -671,14 +735,14 @@
         }
 
         /* moons + shadows */
-        const moonGeo = new THREE.SphereGeometry(0.155, 48, 32);
+        const moonGeo = new THREE.SphereGeometry(0.148, 48, 32);
         const moonSpots = [
-          [2.5, 85],
-          [2.5, 99],
+          [2.5, 88],
+          [2.5, 103],
         ];
         for (const [lat, lng] of moonSpots) {
           const mat = new THREE.MeshBasicMaterial({ map: BASE.moon });
-          mat.color.setScalar(0.78);
+          mat.color.setScalar(0.88);
           const mesh = new THREE.Mesh(moonGeo, mat);
           mesh.userData.anchor = llToVec(lat, lng, 1.002);
           mesh.visible = false;
@@ -691,8 +755,8 @@
           transparent: true,
           depthWrite: false,
         });
-        moonShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.3), shMat);
-        moonShadow.userData.anchor = llToVec(2, 86, 1.004);
+        moonShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.3), shMat);
+        moonShadow.userData.anchor = llToVec(2, 95.5, 1.004);
         moonShadow.visible = false;
         moonShadow.renderOrder = 3;
         scene.add(moonShadow);
@@ -1152,6 +1216,7 @@
 
       /* ---------------------------------------------------------------- boot */
       async function boot() {
+        if (window.__hfShardSetup) window.__hfShardSetup();
         const [earth, coast, grid, asia, flag, moon, water] = await Promise.all([
           tex("assets/processed/earth-graded.jpg"),
           tex("assets/processed/coast-glow.png"),
@@ -1177,12 +1242,13 @@
           /* font load is non-fatal */
         }
         window.addEventListener("hf-seek", (ev) => {
-          const t = ev.detail.time;
+          const raw = ev.detail.time;
+          const t = window.__HF_SHARD ? window.__HF_SHARD.s + raw : raw;
           if (tl) tl.time(t);
           renderAt(t);
         });
         if (tl) tl.eventCallback("onUpdate", () => renderAt(tl.time()));
-        renderAt(window.__hfThreeTime || 0);
+        renderAt(window.__HF_SHARD ? window.__HF_SHARD.s + (window.__hfThreeTime || 0) : window.__hfThreeTime || 0);
       }
       boot();
     </script>
