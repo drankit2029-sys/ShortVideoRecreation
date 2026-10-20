@@ -714,13 +714,13 @@
 
         /* US flag-map cutouts */
         const flagAnchors = [
-          [15, 56],
-          [8, 86],
-          [0, 65],
-          [0, 84],
-          [-9, 61],
-          [-9, 80],
-          [-9, 97],
+          [12, 70],
+          [5, 100],
+          [-3, 79],
+          [-3, 98],
+          [-12, 75],
+          [-12, 94],
+          [-12, 111],
         ];
         const flagGeo = new THREE.PlaneGeometry(0.27, (0.27 * 466) / 984);
         for (const [lat, lng] of flagAnchors) {
@@ -743,8 +743,8 @@
         /* moons + shadows */
         const moonGeo = new THREE.SphereGeometry(0.105, 48, 32);
         const moonSpots = [
-          [4, 85],
-          [4, 102],
+          [4, 88],
+          [4, 108],
         ];
         for (const [lat, lng] of moonSpots) {
           const mat = new THREE.MeshBasicMaterial({ map: BASE.moon });
@@ -762,7 +762,7 @@
           depthWrite: false,
         });
         moonShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.40, 0.26), shMat);
-        moonShadow.userData.anchor = llToVec(4, 93, 1.004);
+        moonShadow.userData.anchor = llToVec(4, 96, 1.004);
         moonShadow.visible = false;
         moonShadow.renderOrder = 3;
         scene.add(moonShadow);

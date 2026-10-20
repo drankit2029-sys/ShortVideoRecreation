@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
 Image.MAX_IMAGE_PIXELS = None
 
@@ -428,6 +428,15 @@ try_fetch(
     PROC / "moon.jpg",
     min_bytes=30_000,
 )
+
+# punch up the moon texture (reference moons show crisp maria, cool tint)
+_m = Image.open(PROC / "moon.jpg").convert("RGB")
+_m = ImageEnhance.Contrast(_m).enhance(1.28)
+_m = ImageEnhance.Brightness(_m).enhance(1.06)
+_r, _g, _b = _m.split()
+_b = _b.point(lambda v: min(255, int(v * 1.09)))
+_m = Image.merge("RGB", (_r, _g, _b))
+_m.save(PROC / "moon.jpg", quality=92)
 
 print("[7/8] font (Inter)")
 try:
