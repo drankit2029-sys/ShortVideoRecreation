@@ -278,6 +278,11 @@ asia_rgba = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a = np.zeros((ah, aw, 4), dtype=np.float32)
 fill_a[..., 0], fill_a[..., 1], fill_a[..., 2] = 255, 201, 60
 fill_a[..., 3] = asia.astype(np.float32) * 24
+# kill RGB outside the land mask so clamped/edge sampling can never wash the ocean
+_soft = np.asarray(
+    Image.fromarray((asia * 255).astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(1.2))
+).astype(np.float32) / 255.0
+fill_a[..., :3] *= _soft[..., None]
 glow = np.asarray(glow_stack(aedge, core="#FFD24A", mid="#FFB300", outer="#FF9500")).astype(np.float32)
 asia_rgba = np.maximum(fill_a, glow)
 # feather the crop borders so the rectangle cut never shows a hard edge
