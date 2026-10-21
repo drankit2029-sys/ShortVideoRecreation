@@ -1437,28 +1437,28 @@
               var fl = document.createElement("span");
               fl.style.left = "0";
               fl.style.top = "0";
-              fl.style.width = fl.style.height = "160px";
+              fl.style.width = fl.style.height = "140px";
               fl.style.borderRadius = "50%";
-              fl.style.background = "radial-gradient(circle, #ffffff 0%, " + colors[0] + " 36%, transparent 72%)";
+              fl.style.background = "radial-gradient(circle, #ffffff 0%, #ffffff 9%, " + colors[0] + " 30%, transparent 62%)";
               fl.style.mixBlendMode = "screen";
               fxWrap.appendChild(fl);
-              gsap.set(fl, { x: cx - 80, y: cy - 80, opacity: 0, scale: 0.35 });
-              tl.to(fl, { opacity: 1, scale: 1.25, duration: 0.1, ease: "power2.out" }, t);
-              tl.to(fl, { opacity: 0, scale: 2.7, duration: 0.62, ease: "power2.out" }, t + 0.1);
+              gsap.set(fl, { x: cx - 70, y: cy - 70, opacity: 0, scale: 0.3 });
+              tl.to(fl, { opacity: 1, scale: 1.15, duration: 0.07, ease: "power2.out" }, t);
+              tl.to(fl, { opacity: 0, scale: 2.2, duration: 0.22, ease: "power2.out" }, t + 0.07);
             }
             if (ring) {
               var rg = document.createElement("span");
               rg.style.left = "0";
               rg.style.top = "0";
               rg.style.width = rg.style.height = "70px";
-              rg.style.border = "4px solid " + colors[0];
+              rg.style.border = "3px solid " + colors[0];
               rg.style.borderRadius = "50%";
               rg.style.mixBlendMode = "screen";
               rg.style.boxShadow = "0 0 18px " + colors[0];
               fxWrap.appendChild(rg);
               gsap.set(rg, { x: cx - 35, y: cy - 35, opacity: 0, scale: 0.35 });
               tl.to(rg, { opacity: 0.85, scale: 1.15, duration: 0.12, ease: "power2.out" }, t + 0.02);
-              tl.to(rg, { opacity: 0, scale: 4.2, duration: 0.75, ease: "power2.out" }, t + 0.14);
+              tl.to(rg, { opacity: 0, scale: 3.4, duration: 0.6, ease: "power2.out" }, t + 0.14);
             }
             for (var k = 0; k < n; k++) {
               var p = document.createElement("span");
