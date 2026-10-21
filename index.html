@@ -1432,7 +1432,7 @@
 
           /* ------------------------------------------------- fireworks rig */
           var fxWrap = $("#fx");
-          function burst(t, cx, cy, colors, n, power, grav, core, ring) {
+          function burst(t, cx, cy, colors, n, power, grav, core) {
             if (core) {
               var fl = document.createElement("span");
               fl.style.left = "0";
@@ -1445,20 +1445,6 @@
               gsap.set(fl, { x: cx - 70, y: cy - 70, opacity: 0, scale: 0.3 });
               tl.to(fl, { opacity: 1, scale: 1.15, duration: 0.07, ease: "power2.out" }, t);
               tl.to(fl, { opacity: 0, scale: 2.2, duration: 0.22, ease: "power2.out" }, t + 0.07);
-            }
-            if (ring) {
-              var rg = document.createElement("span");
-              rg.style.left = "0";
-              rg.style.top = "0";
-              rg.style.width = rg.style.height = "70px";
-              rg.style.border = "3px solid " + colors[0];
-              rg.style.borderRadius = "50%";
-              rg.style.mixBlendMode = "screen";
-              rg.style.boxShadow = "0 0 18px " + colors[0];
-              fxWrap.appendChild(rg);
-              gsap.set(rg, { x: cx - 35, y: cy - 35, opacity: 0, scale: 0.35 });
-              tl.to(rg, { opacity: 0.85, scale: 1.15, duration: 0.12, ease: "power2.out" }, t + 0.02);
-              tl.to(rg, { opacity: 0, scale: 3.4, duration: 0.6, ease: "power2.out" }, t + 0.14);
             }
             for (var k = 0; k < n; k++) {
               var p = document.createElement("span");
@@ -1492,12 +1478,12 @@
             gsap.set(rEl, { x: cx, y: y0, opacity: 0 });
             tl.to(rEl, { y: y1, opacity: 0.9, duration: 0.42, ease: "power1.in" }, t0);
             tl.to(rEl, { opacity: 0, duration: 0.06, ease: "none" }, t0 + 0.42);
-            burst(t0 + 0.42, cx, y1, colors, n, power, 180, true, true);
+            burst(t0 + 0.42, cx, y1, colors, n, power, 180, true);
           }
           var pal = ["#00f5d4", "#ffb703", "#ff4d6d", "#f4f7f6", "#9d4edd"];
           burst(11.18, 540, 900, ["#00f5d4", "#ffb703", "#f4f7f6"], 14, 150, 60, false);
           burst(34.55, 540, 900, ["#00f5d4", "#f4f7f6"], 10, 110, 50, false);
-          burst(41.86, 540, 1122, pal, 34, 280, 240, true, false);
+          burst(41.86, 540, 1122, pal, 34, 280, 240, true);
           rocket(42.35, 300, 1500, 700, pal, 24, 230);
           rocket(42.75, 800, 1500, 620, pal, 24, 230);
           rocket(43.15, 540, 1500, 520, pal, 26, 240);
